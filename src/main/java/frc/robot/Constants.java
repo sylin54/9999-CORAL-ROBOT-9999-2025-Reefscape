@@ -34,4 +34,12 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public class CArm {
+    public static final double TOLERANCE = 0.1;
+    public static final double MANUAL_MAX_SPEED = 0.1;
+    public static final double MIN_HEIGHT = 0;
+    public static final double MAX_HEIGHT = 5;
+    public static final double CLEARANCE_ANGLE = 0.1;
+  }
 }
