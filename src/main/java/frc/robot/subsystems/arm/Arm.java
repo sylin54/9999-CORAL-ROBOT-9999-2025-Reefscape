@@ -1,4 +1,4 @@
-package frc.robot.subsystems.arm.lower_arm;
+package frc.robot.subsystems.arm;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.CArm;
-import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOInputsAutoLogged;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -16,7 +15,7 @@ import org.littletonrobotics.junction.Logger;
  * arm subsystem responsible for controlling the lifting mechanism. Uses PID control for precise
  * movement and prevents unsafe operation via limit switches and software constraints.
  */
-public class LowerArm extends SubsystemBase {
+public class Arm extends SubsystemBase {
 
   // advantage kit logging
   ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
@@ -36,7 +35,7 @@ public class LowerArm extends SubsystemBase {
    * @param moduleIO Hardware interface for Arm motors.
    * @param homeSwitch Digital input limit switch for homing.
    */
-  public LowerArm(ArmIO moduleIO) {
+  public Arm(ArmIO moduleIO) {
     this.moduleIO = moduleIO;
 
     currentHeight = moduleIO.getAngle();
