@@ -22,12 +22,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.communication.TellCommand;
+import frc.robot.commands.communication.ControllerVibrateCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -44,7 +44,6 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSimulation;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -149,6 +148,12 @@ public class RobotContainer {
             arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE));
 
+    intake.setDefaultCommand(
+        Commands.either(
+            intake.setTargetSpeedCommand(0),
+            intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
+            () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE));
+
     // SmartDashboard.putData(
     //     "intake command",
     //     (Sendable)
@@ -157,16 +162,34 @@ public class RobotContainer {
     //             .alongWith(intake.intakeUntilCanRangeIsDetected(5, 1)).until(() ->
     // canrange.getCanDistance() < 1));
 
+    Command intakeCommand =
+        // sets the arm angle to the intake angle
+        arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
+            // if the canrange doesn't see anything set rollers to intake speed
+            .alongWith(
+                Commands.either(
+                    intake.setTargetSpeedCommand(Constants.INTAKE_SPEED),
+                    // if the canrange does see something(we have coral) set rollers to holding
+                    // speed and vibrate controller to let the driver no
+                    intake
+                        .setTargetSpeedCommand(Constants.HOLDING_SPEED)
+                        .alongWith(new ControllerVibrateCommand(0.2, controller)),
+                    // conditional for the earlier statement
+                    () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE));
 
-    Command intakeCommand = arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
-    .alongWith(intake.setTargetSpeedCommand(Constants.ARM_INTAKE_ANGLE)
-    .unless(() -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE));
+    Command scoringCommand =
+        arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
+            .andThen(intake.setTargetSpeedCommand(Constants.EJECT_SPEED))
+            .alongWith(
+                new WaitCommand(Constants.CORAL_RELEASE_TIME)
+                    .andThen(new ControllerVibrateCommand(0.2, controller)));
 
-    SmartDashboard.putData("intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
+    SmartDashboard.putData(
+        "intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
+    SmartDashboard.putData(
+        "scoring command", scoringCommand.andThen(new WaitUntilCommand(() -> false)));
 
-
-
-    // .andThen(new WaitUntilCommand(() -> false))  
+    // .andThen(new WaitUntilCommand(() -> false))
 
     SmartDashboard.putData(
         "arm set target angle 0", (Sendable) this.arm.setTargetHeightCommandConsistentEnd(0));
@@ -184,7 +207,6 @@ public class RobotContainer {
         "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
     SmartDashboard.putData(
         "set canrange vision 5", (Sendable) this.canrange.setCanrangeDistanceCommand(5));
-
   }
 
   /**

@@ -132,9 +132,9 @@ public class Robot extends LoggedRobot {
 
     intakeMechanism.setColorSupplier(
         () -> {
-          if (robotContainer.getIntake().getRollerSpeed() > 1) {
+          if (robotContainer.getIntake().getRollerSpeed() > 0.1) {
             return new Color8Bit(Color.kGreen);
-          } else if (robotContainer.getIntake().getRollerSpeed() < -1) {
+          } else if (robotContainer.getIntake().getRollerSpeed() < -0.1) {
             return new Color8Bit(Color.kRed);
           } else {
             return new Color8Bit(Color.kAliceBlue);
