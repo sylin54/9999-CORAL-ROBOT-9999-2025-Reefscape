@@ -43,7 +43,7 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   private VisualSimulator armMechanism;
-  private VisualSimulator upperArmMechanism;
+  private VisualSimulator intakeMechanism;
 
   public Robot() {
     // Record metadata
@@ -112,12 +112,34 @@ public class Robot extends LoggedRobot {
     // simulation code, uses our library
     armMechanism =
         new VisualSimulator(
-            new Translation2d(),
+            new Translation2d(0.3, 0),
             () -> 90 - robotContainer.getArm().getCurrentAngle() * 15,
             () -> Units.inchesToMeters(15),
             Units.inchesToMeters(5),
             new Color8Bit(Color.kYellow),
             "arm mechanism 2d");
+
+    intakeMechanism =
+        new VisualSimulator(
+            new Translation2d(),
+            () -> armMechanism.getAngle().getDegrees() - 90,
+            () -> Units.inchesToMeters(5),
+            Units.inchesToMeters(5),
+            new Color8Bit(),
+            "intake mechanism 2d");
+
+    intakeMechanism.setParent(armMechanism);
+
+    intakeMechanism.setColorSupplier(
+        () -> {
+          if (robotContainer.getIntake().getRollerSpeed() > 1) {
+            return new Color8Bit(Color.kGreen);
+          } else if (robotContainer.getIntake().getRollerSpeed() < -1) {
+            return new Color8Bit(Color.kRed);
+          } else {
+            return new Color8Bit(Color.kAliceBlue);
+          }
+        });
   }
 
   /** This function is called periodically during all modes. */

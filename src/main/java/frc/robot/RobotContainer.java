@@ -23,18 +23,27 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.communication.TellCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmSimulationIO;
+import frc.robot.subsystems.canrange.RangeFinder;
+import frc.robot.subsystems.canrange.RangeFinderIO;
+import frc.robot.subsystems.canrange.RangeFinderSimulationIO;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSimulation;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -54,6 +63,8 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public final Arm arm;
+  public final RangeFinder canrange;
+  public final Intake intake;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -69,6 +80,9 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         arm = new Arm(new ArmIO() {});
 
+        canrange = new RangeFinder(new RangeFinderIO() {});
+        intake = new Intake(new IntakeIO() {}, canrange);
+
         break;
 
       case SIM:
@@ -82,6 +96,10 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         arm = new Arm(new ArmSimulationIO());
+
+        canrange = new RangeFinder(new RangeFinderSimulationIO());
+        intake = new Intake(new IntakeIOSimulation(), canrange);
+
         break;
 
       default:
@@ -95,6 +113,9 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         arm = new Arm(new ArmIO() {});
+
+        canrange = new RangeFinder(new RangeFinderIO() {});
+        intake = new Intake(new IntakeIO() {}, canrange);
 
         break;
     }
@@ -121,8 +142,41 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    SmartDashboard.putData("arm set target angle 0", (Sendable) this.arm.setTargetHeightCommand(0));
-    SmartDashboard.putData("arm set target angle 5", (Sendable) this.arm.setTargetHeightCommand(5));
+    arm.setDefaultCommand(
+        Commands.either(
+            arm.setTargetHeightCommand(4),
+            arm.setTargetHeightCommand(0),
+            () -> canrange.getCanDistance() > 1));
+
+    // SmartDashboard.putData(
+    //     "intake command",
+    //     (Sendable)
+    //         this.arm
+    //             .setTargetHeightCommand(4)
+    //             .alongWith(intake.intakeUntilCanRangeIsDetected(5, 1)).until(() ->
+    // canrange.getCanDistance() < 1));
+
+    SmartDashboard.putData("intake until", (Sendable) intake.intakeUntilCanRangeIsDetected(123, 1));
+
+    // .andThen(new WaitUntilCommand(() -> false))  
+
+    SmartDashboard.putData(
+        "arm set target angle 0", (Sendable) this.arm.setTargetHeightCommandConsistentEnd(0));
+    SmartDashboard.putData(
+        "arm set target angle 5", (Sendable) this.arm.setTargetHeightCommandConsistentEnd(5));
+
+    SmartDashboard.putData(
+        "intake set target speed 5", (Sendable) this.intake.setTargetSpeedCommand(5));
+    SmartDashboard.putData(
+        "intake set target speed 0", (Sendable) this.intake.setTargetSpeedCommand(0));
+    SmartDashboard.putData(
+        "intake set target speed -5", (Sendable) this.intake.setTargetSpeedCommand(-5));
+
+    SmartDashboard.putData(
+        "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
+    SmartDashboard.putData(
+        "set canrange vision 5", (Sendable) this.canrange.setCanrangeDistanceCommand(5));
+
   }
 
   /**
@@ -176,5 +230,13 @@ public class RobotContainer {
 
   public Arm getArm() {
     return arm;
+  }
+
+  public Intake getIntake() {
+    return intake;
+  }
+
+  public RangeFinder getCanrange() {
+    return canrange;
   }
 }
