@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -144,9 +145,9 @@ public class RobotContainer {
 
     arm.setDefaultCommand(
         Commands.either(
-            arm.setTargetHeightCommand(4),
-            arm.setTargetHeightCommand(0),
-            () -> canrange.getCanDistance() > 1));
+            arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE),
+            arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
+            () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE));
 
     // SmartDashboard.putData(
     //     "intake command",
@@ -156,7 +157,14 @@ public class RobotContainer {
     //             .alongWith(intake.intakeUntilCanRangeIsDetected(5, 1)).until(() ->
     // canrange.getCanDistance() < 1));
 
-    SmartDashboard.putData("intake until", (Sendable) intake.intakeUntilCanRangeIsDetected(123, 1));
+
+    Command intakeCommand = arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
+    .alongWith(intake.setTargetSpeedCommand(Constants.ARM_INTAKE_ANGLE)
+    .unless(() -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE));
+
+    SmartDashboard.putData("intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
+
+
 
     // .andThen(new WaitUntilCommand(() -> false))  
 

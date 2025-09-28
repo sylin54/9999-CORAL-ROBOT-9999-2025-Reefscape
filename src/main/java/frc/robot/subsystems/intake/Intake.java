@@ -186,10 +186,10 @@ public class Intake extends SubsystemBase {
   }
 
   // intakes until the canrange finds distance less than the given distance
-  public Command intakeUntilCanRangeIsDetected(double speed, double distance) {
-    return new RunCommand(() -> this.setTargetSpeed(speed), this)
-        .until(() -> canRange.getCanDistance() < distance);
-  }
+  // public Command intakeUntilCanRangeIsDetected(double speed, double distance) {
+  //   return new RunCommand(() -> this.setTargetSpeed(speed), this)
+  //       .until(() -> canRange.getCanDistance() < distance);
+  // }
 
   // simple command that requires this subsystem
   public Command requireSubsystemCommand() {

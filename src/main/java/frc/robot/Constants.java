@@ -27,6 +27,16 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  public static final double ARM_SCORING_ANGLE = 0;
+  public static final double ARM_INTAKE_ANGLE = 4;
+
+  public static final double INTAKE_SPEED = -1;
+  public static final double EJECT_SPEED = 1;
+  public static final double HOLDING_SPEED = 0;
+
+  public static final double CANRANGE_DETECTION_DISTANCE = 1;
+
+
   public static boolean isFlipped() {
     return DriverStation.getAlliance().isPresent()
         && DriverStation.getAlliance().get() == Alliance.Red;
