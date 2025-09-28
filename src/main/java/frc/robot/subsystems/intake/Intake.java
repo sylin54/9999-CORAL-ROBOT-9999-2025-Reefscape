@@ -1,106 +1,106 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants.CArm;
+import frc.robot.Constants;
+import frc.robot.Constants.CIntake;
+import frc.robot.subsystems.canrange.RangeFinder;
+import frc.robot.util.FieldMovement.VortechsUtil;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * arm subsystem responsible for controlling the lifting mechanism. Uses PID control for precise
- * movement and prevents unsafe operation via limit switches and software constraints.
- */
-public class Arm extends SubsystemBase {
+/** Intake subsystem responsible for the intake rolling mechanism */
+public class Intake extends SubsystemBase {
 
   // advantage kit logging
-  ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+  private IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   // useful for a flexible hardware interface and for advantage kit logging
-  private final ArmIO moduleIO;
+  private final IntakeIO moduleIO;
+
+  private final RangeFinder canRange;
 
   // these are for advantage kit state logging and/or for keeping track of key variables
-  @AutoLogOutput private double currentHeight = 0.0;
-  @AutoLogOutput private double targetHeight = 0.0;
+  @AutoLogOutput private double currentSpeed = 0.0;
+  @AutoLogOutput private double targetSpeed = 0.0;
   @AutoLogOutput private boolean isOnTarget = false;
   @AutoLogOutput private boolean manualOverride = false;
 
   /**
-   * Constructor for the Arm subsystem.
+   * Constructor for the Intake subsystem.
    *
-   * @param moduleIO Hardware interface for Arm motors.
+   * @param moduleIO Hardware interface for Intake motors.
    * @param homeSwitch Digital input limit switch for homing.
    */
-  public Arm(ArmIO moduleIO) {
+  public Intake(IntakeIO moduleIO, RangeFinder canRange) {
     this.moduleIO = moduleIO;
+    this.canRange = canRange;
 
-    currentHeight = moduleIO.getAngle();
-    targetHeight = moduleIO.getAngle();
-    setTargetHeight(currentHeight);
+    currentSpeed = moduleIO.getSpeed();
+    targetSpeed = moduleIO.getTargetSpeed();
+    setTargetSpeed(currentSpeed);
   }
 
   @Override
   public void periodic() {
     moduleIO.updateInputs(inputs);
-    Logger.processInputs("Arm", inputs);
+    Logger.processInputs("Intake", inputs);
 
     // check to see if the module is stalling; if so, then stop the motors and cancel the next
     // movement
 
     if (moduleIO.checkIfStalled()) {
-      System.out.println("ARM HAS STALLED ");
+      System.out.println("Intake HAS STALLED ");
       moduleIO.stop();
       return;
     }
 
-    currentHeight = moduleIO.getAngle();
+    currentSpeed = moduleIO.getSpeed();
 
-    // if manual override do a quick bounds check then retuorn
+    // if manual override return
     if (manualOverride) {
-
-      if (getCurrentAngle() < CArm.MIN_HEIGHT - CArm.TOLERANCE
-          || getCurrentAngle() > CArm.MAX_HEIGHT) {
-        System.out.println("ARM OUT OF BOUDNS");
-        setManualSpeed(0);
-      }
       return;
     }
 
     isOnTarget = isOnTarget();
 
-    // Clamp target height to prevent exceeding limits
-    targetHeight = Math.max(0.0, Math.min(targetHeight, CArm.MAX_HEIGHT));
+    // Clamp target speed to prevent exceeding limits
+    targetSpeed = VortechsUtil.clamp(targetSpeed, Constants.CIntake.MAX_TARGET_SPEED);
 
-    moduleIO.PIDVoltage(targetHeight);
+    moduleIO.setTargetSpeed(targetSpeed);
   }
 
-  /** Sets a new target height for the arm using PID control. */
-  public void setTargetHeight(double height) {
-
+  /** Sets a new target height for the Intake using PID control. */
+  public void setTargetSpeed(double targetSpeed) {
     manualOverride = false;
 
-    targetHeight = Math.max(0.0, Math.min(height, CArm.MAX_HEIGHT));
+    // Clamp target speed to prevent exceeding limits
+    this.targetSpeed = VortechsUtil.clamp(targetSpeed, Constants.CIntake.MAX_TARGET_SPEED);
   }
 
-  /** Allows manual control of the arm, bypassing PID. */
-  public void setManualSpeed(double speed) {
+  /** Allows manual control of the Intake, bypassing PID. */
+  public void setManualVoltage(double voltage) {
     manualOverride = true;
 
-    if (Math.abs(speed) > CArm.MANUAL_MAX_SPEED)
-      speed = Math.copySign(CArm.MANUAL_MAX_SPEED, speed);
-    System.out.println("Above speed limit; rate limiting ARM speed.");
-    moduleIO.setRollerSpeed(speed);
+    // clamp speed to prevent exceeding limits
+    voltage = VortechsUtil.clamp(voltage, Constants.CIntake.MAX_MANUAL_SPEED);
+
+    System.out.println("Above speed limit; rate limiting Intake speed.");
+    moduleIO.setVoltage(voltage);
   }
 
   /** Holds the current position using PID control. */
   public void holdPositionPID() {
+    System.out.println("holding position pid");
     manualOverride = false;
-    if (Math.abs(targetHeight - currentHeight) > CArm.TOLERANCE) {
-      targetHeight = currentHeight;
-      moduleIO.PIDVoltage(targetHeight);
+    if (Math.abs(targetSpeed - currentSpeed) > CIntake.SPEED_TOLERANCE) {
+
+      targetSpeed = currentSpeed;
+      moduleIO.setTargetPosition(moduleIO.getPosition());
     }
   }
 
@@ -116,23 +116,23 @@ public class Arm extends SubsystemBase {
     manualOverride = true;
   }
 
-  // returns wether or not the arm is close to the floor
+  // returns wether or not the Intake is close to the floor
   public boolean isOnFloor() {
     return getCurrentAngle() < 0.1;
   }
 
-  // gest the current height of the arm motor
+  // gest the current height of the Intake motor
   public double getCurrentAngle() {
-    return currentHeight;
+    return currentSpeed;
   }
 
-  public double getTargetHeight() {
-    return targetHeight;
+  public double getTargetSpeed() {
+    return targetSpeed;
   }
 
   // returns wether or not the elevaotr is on target
   public boolean isOnTarget() {
-    return (Math.abs(currentHeight - targetHeight) < CArm.TOLERANCE);
+    return (Math.abs(currentSpeed - targetSpeed) < CIntake.SPEED_TOLERANCE);
   }
 
   /** resets encoders to read 0 and resets PID (setting it to begin at current height) */
@@ -140,41 +140,41 @@ public class Arm extends SubsystemBase {
     moduleIO.resetEncoders();
   }
 
+  // gets the roller speed
+  public double getRollerSpeed() {
+    return moduleIO.getSpeed();
+  }
+
   // resets the motors pid
   public void rebuildMotorsPID() {
     moduleIO.rebuildMotorsPID();
   }
 
-  // returns wether or not the arm is clear from the arm
-  public boolean isClearFromElevator() {
-    return getCurrentAngle() > CArm.CLEARANCE_ANGLE;
-  }
-
   // commands
 
   // sets the target height of the subsystem. Ends immediately
-  public Command setTargetHeightCommand(double targetHeight) {
-    return new InstantCommand(() -> this.setTargetHeight(targetHeight), this);
+  public Command setTargetSpeedCommand(double targetSpeed) {
+    return new InstantCommand(() -> this.setTargetSpeed(targetSpeed), this);
   }
 
   // sets the target height of the subsystem. Ends when the subsystem reaches this height
-  public Command setTargetHeightCommandConsistentEnd(double targetHeight) {
-    return new InstantCommand(() -> this.setTargetHeight(targetHeight), this)
+  public Command setTargetSpeedCommandConsistentEnd(double targetSpeed) {
+    return new InstantCommand(() -> this.setTargetSpeed(targetSpeed), this)
         .andThen(new WaitUntilCommand(() -> this.isOnTarget));
   }
 
   // sets the manual override speed of this command. Uses a regular double
   public Command setManualOverrideCommand(double speed) {
-    return new RunCommand(() -> this.setManualSpeed(speed), this);
+    return new RunCommand(() -> this.setManualVoltage(speed), this);
   }
 
   // sets the manual override speed of this command. Uses a double supplier
   public Command setManualOverrideCommand(DoubleSupplier speed) {
-    return new RunCommand(() -> this.setManualSpeed(speed.getAsDouble()), this);
+    return new RunCommand(() -> this.setManualVoltage(speed.getAsDouble()), this);
   }
 
   // makes the PID hold position. If true it'll use brake if false it'll pid.
-  public Command holdPositionCommand(boolean brake) {
+  public Command holdSpeedCommand(boolean brake) {
     if (brake) return new InstantCommand(() -> this.holdPositionBrake(), this);
 
     return new InstantCommand(() -> this.holdPositionPID(), this);
@@ -183,6 +183,12 @@ public class Arm extends SubsystemBase {
   // resets the encoders of the wrist
   public Command resetEncodersCommand() {
     return new InstantCommand(() -> this.resetEncoders());
+  }
+
+  // intakes until the canrange finds distance less than the given distance
+  public Command intakeUntilCanRangeIsDetected(double speed, double distance) {
+    return new RunCommand(() -> this.setTargetSpeed(speed), this)
+        .until(() -> canRange.getCanDistance() < distance);
   }
 
   // simple command that requires this subsystem

@@ -13,6 +13,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathConstraints;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -23,6 +27,11 @@ import edu.wpi.first.wpilibj.RobotBase;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+
+  public static boolean isFlipped() {
+    return DriverStation.getAlliance().isPresent()
+        && DriverStation.getAlliance().get() == Alliance.Red;
+  }
 
   public static enum Mode {
     /** Running on a real robot. */
@@ -41,5 +50,20 @@ public final class Constants {
     public static final double MIN_HEIGHT = 0;
     public static final double MAX_HEIGHT = 5;
     public static final double CLEARANCE_ANGLE = 0.1;
+  }
+
+  public class CIntake {
+    // dummy values for now
+    public static final double MAX_TARGET_SPEED = 100;
+    public static final double MAX_MANUAL_SPEED = 100;
+    public static final double SPEED_TOLERANCE = 0.2;
+  }
+
+  public class CDrivetrain {
+    public static PathConstraints DEFAULT_PATH_CONSTRAINTS =
+        new PathConstraints(3.5, 4, Math.PI * 3.5, Math.PI * 4);
+
+    public static double TOLERANCE_DIST = 0.1;
+    public static double TOLERANCE_ROT = 0.1;
   }
 }
