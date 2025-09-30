@@ -163,9 +163,10 @@ public class RobotContainer {
     //             .setTargetHeightCommand(4)
     //             .alongWith(intake.intakeUntilCanRangeIsDetected(5, 1)).until(() ->
     // canrange.getCanDistance() < 1));
-        
-        // if the canrange doesn't see anything set rollers to intake speed
-    Command intakeCommand = new ConditionalCommand(
+
+    // if the canrange doesn't see anything set rollers to intake speed
+    Command intakeCommand =
+        new ConditionalCommand(
                 intake.setTargetSpeedCommand(Constants.INTAKE_SPEED),
                 // if the canrange does see something(we have coral) set rollers to holding
                 // speed and vibrate controller to let the driver no
@@ -179,7 +180,6 @@ public class RobotContainer {
             .alongWith(
                 // sets the arm angle to the intake angle
                 arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE));
-                
 
     Command scoringCommand =
         arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
