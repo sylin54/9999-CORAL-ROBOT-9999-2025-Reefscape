@@ -78,8 +78,12 @@ public class Intake extends SubsystemBase {
   public void setTargetSpeed(double targetSpeed) {
     manualOverride = false;
 
+    double clampedSpeed = VortechsUtil.clamp(targetSpeed, Constants.CIntake.MAX_TARGET_SPEED);
+
+    System.out.println("setting target speed to " + clampedSpeed + " from " + targetSpeed);
+
     // Clamp target speed to prevent exceeding limits
-    this.targetSpeed = VortechsUtil.clamp(targetSpeed, Constants.CIntake.MAX_TARGET_SPEED);
+    this.targetSpeed = clampedSpeed;
   }
 
   /** Allows manual control of the Intake, bypassing PID. */
@@ -153,8 +157,12 @@ public class Intake extends SubsystemBase {
   // commands
 
   // sets the target height of the subsystem. Ends immediately
-  public Command setTargetSpeedCommand(double targetSpeed) {
+  public Command instantSetTargetSpeedCommand(double targetSpeed) {
     return new InstantCommand(() -> this.setTargetSpeed(targetSpeed), this);
+  }
+
+  public Command setTargetSpeedCommand(double targetSpeed) {
+    return this.run(() -> this.setTargetSpeed(targetSpeed));
   }
 
   // sets the target height of the subsystem. Ends when the subsystem reaches this height

@@ -34,7 +34,12 @@ public final class Constants {
 
   public static final double INTAKE_SPEED = -1;
   public static final double EJECT_SPEED = 1;
-  public static final double HOLDING_SPEED = 0;
+  public static final double HOLDING_SPEED = -0.02;
+
+  public static final double FREE_CANRANGE_DIST = 1;
+  
+  public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
+
 
   public static final double CANRANGE_DETECTION_DISTANCE = 1;
 
