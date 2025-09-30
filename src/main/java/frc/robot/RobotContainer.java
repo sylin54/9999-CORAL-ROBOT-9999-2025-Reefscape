@@ -173,7 +173,7 @@ public class RobotContainer {
                     // speed and vibrate controller to let the driver no
                     intake
                         .setTargetSpeedCommand(Constants.HOLDING_SPEED)
-                        .alongWith(new ControllerVibrateCommand(0.2, controller)),
+                        .alongWith(new WaitCommand(0.2).andThen(new ControllerVibrateCommand(0.2, controller))),
                     // conditional for the earlier statement
                     () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE));
 
@@ -184,10 +184,14 @@ public class RobotContainer {
                 new WaitCommand(Constants.CORAL_RELEASE_TIME)
                     .andThen(new ControllerVibrateCommand(0.2, controller)));
 
-    SmartDashboard.putData(
-        "intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
-    SmartDashboard.putData(
-        "scoring command", scoringCommand.andThen(new WaitUntilCommand(() -> false)));
+    controller.leftTrigger().whileTrue(intakeCommand);
+
+    controller.rightTrigger().whileTrue(scoringCommand);
+
+    // SmartDashboard.putData(
+    //     "intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
+    // SmartDashboard.putData(
+    //     "scoring command", scoringCommand.andThen(new WaitUntilCommand(() -> false)));
 
     // .andThen(new WaitUntilCommand(() -> false))
 
