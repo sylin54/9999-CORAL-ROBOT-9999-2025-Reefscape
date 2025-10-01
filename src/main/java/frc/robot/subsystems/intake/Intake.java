@@ -80,8 +80,6 @@ public class Intake extends SubsystemBase {
 
     double clampedSpeed = VortechsUtil.clamp(targetSpeed, Constants.CIntake.MAX_TARGET_SPEED);
 
-    System.out.println("setting target speed to " + clampedSpeed + " from " + targetSpeed);
-
     // Clamp target speed to prevent exceeding limits
     this.targetSpeed = clampedSpeed;
   }

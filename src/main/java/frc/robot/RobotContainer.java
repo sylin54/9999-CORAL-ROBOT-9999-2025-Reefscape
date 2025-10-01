@@ -166,20 +166,18 @@ public class RobotContainer {
 
     // if the canrange doesn't see anything set rollers to intake speed
     Command intakeCommand =
-        new ConditionalCommand(
-                intake.setTargetSpeedCommand(Constants.INTAKE_SPEED),
-                // if the canrange does see something(we have coral) set rollers to holding
-                // speed and vibrate controller to let the driver no
-                intake
-                    .setTargetSpeedCommand(Constants.HOLDING_SPEED)
-                    .alongWith(
-                        new WaitCommand(0.2)
-                            .andThen(new ControllerVibrateCommand(0.2, controller))),
-                // conditional for the earlier statement
-                () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+        // set the arm height to the floor
+        arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
             .alongWith(
-                // sets the arm angle to the intake angle
-                arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE));
+                //intakes
+                intake
+                    .setTargetSpeedCommand(Constants.INTAKE_SPEED)
+                    //when it notices a coral inside it vibrates the controller
+                    .until(() -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE)
+                    .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
+                    .andThen(
+                        new ControllerVibrateCommand(
+                            Constants.CONTROLLER_FEEDBACK_AMOUNT, controller)));
 
     Command scoringCommand =
         arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
