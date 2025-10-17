@@ -76,10 +76,10 @@ public class IntakeIOMotor implements IntakeIO {
     inputsAutoLogged.targetPosition = targetPosition;
 
     inputsAutoLogged.rollersCurrent = getCurrent();
-    inputAutoLogged.rollerVolts = getVoltage();
+    inputsAutoLogged.rollerVolts = getVoltage();
 
-    inputs.rollersEncoder = rollers.getPosition().getValueAsDouble();
-    inputs.rollersSpeed = rollers.get();
+    inputsAutoLogged.rollersEncoder = rollers.getPosition().getValueAsDouble();
+    inputsAutoLogged.rollersSpeed = rollers.get();
 
     inputsAutoLogged.controlType = controlType.name();
   }
@@ -136,7 +136,7 @@ public class IntakeIOMotor implements IntakeIO {
 
   @Override
   public void resetEncoders() {
-    rollers.
+    rollers.setPosition(0);
   }
 
   @Override
@@ -151,7 +151,7 @@ public class IntakeIOMotor implements IntakeIO {
   // gets the height of the arm in meters
   @Override
   public double getPosition() {
-    return motorSim.getAngularPositionRotations();
+    return rollers.getPosition().getValueAsDouble();
   }
 
   @Override
@@ -174,11 +174,11 @@ public class IntakeIOMotor implements IntakeIO {
 
   @Override
   public double getSpeed() {
-    return motorSim.getInputVoltage();
+    return rollers.get();
   }
 
   protected void updatePID() {
-    double currentAngle = motorSim.getAngularPositionRotations();
+    double currentAngle = getPosition();
     double inputVoltage = controller.calculate(currentAngle, targetPosition);
     // System.out.println("Input volt: "+inputVoltage+" Target Angle: "+targetAngle);x
     setVoltage(inputVoltage);
