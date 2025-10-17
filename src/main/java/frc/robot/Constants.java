@@ -27,20 +27,27 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  //angles
   public static final double ARM_SCORING_ANGLE = 0;
   public static final double ARM_INTAKE_ANGLE = 4;
 
+  //controller times
   public static final double CORAL_RELEASE_TIME = 1;
 
+  //controller sppeds
   public static final double INTAKE_SPEED = -1;
   public static final double EJECT_SPEED = 1;
   public static final double HOLDING_SPEED = -0.02;
 
+  //canrange constants
   public static final double FREE_CANRANGE_DIST = 1;
+  public static final double CANRANGE_DETECTION_DISTANCE = 1;
 
+  //controller constants
   public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
 
-  public static final double CANRANGE_DETECTION_DISTANCE = 1;
+  //intake roller constants
+  public static final double INTAKE_CURRENT_LIMIT = 100;
 
   public static boolean isFlipped() {
     return DriverStation.getAlliance().isPresent()

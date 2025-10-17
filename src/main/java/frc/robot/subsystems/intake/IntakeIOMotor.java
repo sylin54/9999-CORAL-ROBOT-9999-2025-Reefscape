@@ -1,6 +1,11 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Amps;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /* 
 public class IntakeIOMotor implements IntakeIO {
@@ -17,19 +22,15 @@ public class IntakeIOMotor implements IntakeIO {
   }
 }
   */
-
-/*
-package frc.robot.subsystems.intake;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants;
 import frc.robot.util.VTControlType;
 
-public class IntakeIOSimulation implements IntakeIO {
-  private final DCMotorSim motorSim;
+public class IntakeIOMotor implements IntakeIO {
 
   private PIDController controller;
 
@@ -40,14 +41,28 @@ public class IntakeIOSimulation implements IntakeIO {
 
   private VTControlType controlType = VTControlType.MANUAL;
 
-  public IntakeIOSimulation() {
+  private TalonFX rollers;
 
-    this.motorSim =
-        new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), 0.001, 1),
-            DCMotor.getKrakenX60(1));
+  public IntakeIOMotor(int rollerID, String canbusName) {
+
+    rollers = new TalonFX(rollerID, canbusName);
 
     rebuildMotorsPID();
+
+    TalonFXConfiguration rollerMotorConfigs =
+      new TalonFXConfiguration()
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  // Swerve azimuth does not require much torque output, so we can set a
+                  // relatively
+                  // low
+                  // stator current limit to help avoid brownouts without impacting performance.
+                  .withStatorCurrentLimit(Amps.of(Constants.INTAKE_CURRENT_LIMIT))
+                  .withStatorCurrentLimitEnable(true));
+    rollers.getConfigurator().apply(rollerMotorConfigs);
+
+    // Set motor to Brake mode by default.
+    rollers.setNeutralMode(NeutralModeValue.Brake);
   }
 
   // updates the given inputs with new values(advantage kit stuff)
@@ -108,7 +123,7 @@ public class IntakeIOSimulation implements IntakeIO {
     controller = new PIDController(0.9, 0, 0.1);
   }
 
-  * Stops the motor immediately
+  // Stops the motor immediately
   @Override
   public void stop() {
     setVoltage(0);
@@ -171,6 +186,7 @@ public class IntakeIOSimulation implements IntakeIO {
   }
 }
 
+/*
 todolist:
 -standardize io layers
 
