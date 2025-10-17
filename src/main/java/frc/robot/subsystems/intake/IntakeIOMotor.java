@@ -69,14 +69,17 @@ public class IntakeIOMotor implements IntakeIO {
   @Override
   public void updateInputs(IntakeIOInputsAutoLogged inputsAutoLogged) {
 
+    //will update PID every tick
     if (controlType == VTControlType.POSITION_PID) updatePID();
 
-    inputsAutoLogged.rollerAmps = motorSim.getCurrentDrawAmps();
-    inputsAutoLogged.rollerVolts = motorSim.getInputVoltage();
-    inputsAutoLogged.position = motorSim.getAngularPositionRad();
-    inputsAutoLogged.rollerSpeed = motorSim.getAngularVelocityRadPerSec();
     inputsAutoLogged.targetSpeed = targetSpeed;
     inputsAutoLogged.targetPosition = targetPosition;
+
+    inputsAutoLogged.rollersCurrent = getCurrent();
+    inputAutoLogged.rollerVolts = getVoltage();
+
+    inputs.rollersEncoder = rollers.getPosition().getValueAsDouble();
+    inputs.rollersSpeed = rollers.get();
 
     inputsAutoLogged.controlType = controlType.name();
   }
@@ -86,12 +89,12 @@ public class IntakeIOMotor implements IntakeIO {
   // gets the height of the arm in meters
   @Override
   public double getCurrent() {
-    return motorSim.getCurrentDrawAmps();
+    return rollers.getStatorCurrent().getValueAsDouble();
   }
 
   @Override
   public double getVoltage() {
-    return motorSim.getInputVoltage();
+    return rollers.getMotorVoltage().getValueAsDouble();
   }
 
   // setters for motors
@@ -99,7 +102,7 @@ public class IntakeIOMotor implements IntakeIO {
   public void setVoltage(double volt) {
     controlType = VTControlType.MANUAL;
 
-    motorSim.setInputVoltage(MathUtil.clamp(volt, -12, 12));
+    rollers.setVoltage(volt);
   }
 
   // sets the position of the rollers. This function will most likely not be implemented
@@ -127,12 +130,13 @@ public class IntakeIOMotor implements IntakeIO {
   @Override
   public void stop() {
     setVoltage(0);
-  }
-  ;
+
+    controlType = VTControlType.MANUAL;
+  };
 
   @Override
   public void resetEncoders() {
-    motorSim.setAngle(0);
+    rollers.
   }
 
   @Override
@@ -160,12 +164,12 @@ public class IntakeIOMotor implements IntakeIO {
     controlType = VTControlType.SPEED_PID;
     targetSpeed = speed;
 
-    motorSim.setInputVoltage(speed * Math.PI * 2);
+    rollers.set(speed);
   }
 
   @Override
   public double getTargetSpeed() {
-    return motorSim.getAngularVelocityRadPerSec() * Math.PI * 2;
+    return targetSpeed;
   }
 
   @Override
