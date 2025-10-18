@@ -27,27 +27,60 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
-  //angles
+  // angles
   public static final double ARM_SCORING_ANGLE = 0;
   public static final double ARM_INTAKE_ANGLE = 4;
 
-  //controller times
+  // controller constants
+  public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
+
+  // controller times
   public static final double CORAL_RELEASE_TIME = 1;
 
-  //controller sppeds
+  // controller sppeds
   public static final double INTAKE_SPEED = -1;
   public static final double EJECT_SPEED = 1;
   public static final double HOLDING_SPEED = -0.02;
 
-  //canrange constants
+  // canrange constants
   public static final double FREE_CANRANGE_DIST = 1;
   public static final double CANRANGE_DETECTION_DISTANCE = 1;
 
-  //controller constants
-  public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
+  // arm constants
+  public static final double ARM_kS = 0.25;
+  public static final double ARM_kV = 0.12;
+  public static final double ARM_kA = 0.01;
+  public static final double ARM_kP = 7.5;
+  public static final double ARM_kI = 0;
+  public static final double ARM_kD = 0.1;
+  public static final double ARM_kG = 0.2;
 
-  //intake roller constants
-  public static final double INTAKE_CURRENT_LIMIT = 100;
+  public static final double ARM_SPEED_LIMIT = 3;
+  public static final double ARM_ACCELERATION_LIMIT = 2.5;
+  public static final double ARM_JERK_LIMIT = 10;
+  public static final double ARM_TOLERANCE = 0.1;
+  public static final double ARM_CURRENT_LIMIT = 1; // shoudl be 65, currently one for testing
+  public static final double ARM_MAX_ANGLE = 100;
+
+  // var slot0Configs = armMotorConfigs.Slot0;
+  // slot0Configs.kS = PWrist.kS.getValue(); // Add 0.25 V output to overcome static friction
+  // slot0Configs.kV = PWrist.kV.getValue(); // A velocity target of 1 rps results in 0.12 V output
+  // slot0Configs.kA = PWrist.kA.getValue(); // An acceleration of 1 rps/s requires 0.01 V output
+  // slot0Configs.kP =
+  //     PWrist.kP.getValue(); // A position error of 2.5 rotations results in 12 V output
+  // slot0Configs.kI = PWrist.kI.getValue(); // no output for integrated error
+  // slot0Configs.kD = PWrist.kD.getValue(); // A velocity error of 1 rps results in 0.1 V output
+
+  // var motionMagicConfigs = armMotorConfigs.MotionMagic;
+  // motionMagicConfigs.MotionMagicCruiseVelocity = PWrist.speedLimit.getValue();
+  // motionMagicConfigs.MotionMagicAcceleration = PWrist.accelerationLimit.getValue();
+  // motionMagicConfigs.MotionMagicJerk = PWrist.jerkLimit.getValue();
+
+  // intake constants
+  public static final double INTAKE_CURRENT_LIMIT =
+      1; // originall at 100, need to do subsystem testing to find this. At 1 rn for testing.
+  public static double INTAKE_MAX_POSITION = 0.0;
+  public static double INTAKE_TOLERANCE = 0.1;
 
   public static boolean isFlipped() {
     return DriverStation.getAlliance().isPresent()

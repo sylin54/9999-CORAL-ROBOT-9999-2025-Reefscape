@@ -6,59 +6,37 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-/* 
-public class IntakeIOMotor implements IntakeIO {
-  private TalonFX intakemotor = new TalonFX(0);
-
-  public void SetMotorSpeed(double Speed) {
-    intakemotor.set(Speed);
-  }
-
-  public void updateInputs(IntakeIOInputsAutoLogged inputs) {
-    inputs.CurrentMotorSpeed = intakemotor.get();
-    inputs.CurrentMotorVoltage = intakemotor.getMotorVoltage(true).getValueAsDouble();
-    inputs.CurrentMotorAmps = intakemotor.getStatorCurrent().getValueAsDouble();
-  }
-}
-  */
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 import frc.robot.util.VTControlType;
 
-public class IntakeIOMotor implements IntakeIO {
+public class IntakeIOTalonFX implements IntakeIO {
 
   private PIDController controller;
 
-  protected double tolerance = 0.1;
   protected double targetPosition = 0;
-  protected double maxPosition = 0.0;
   protected double targetSpeed = 0;
 
   private VTControlType controlType = VTControlType.MANUAL;
 
   private TalonFX rollers;
 
-  public IntakeIOMotor(int rollerID, String canbusName) {
+  public IntakeIOTalonFX(int rollerID, String canbusName) {
 
     rollers = new TalonFX(rollerID, canbusName);
 
     rebuildMotorsPID();
 
     TalonFXConfiguration rollerMotorConfigs =
-      new TalonFXConfiguration()
-          .withCurrentLimits(
-              new CurrentLimitsConfigs()
-                  // Swerve azimuth does not require much torque output, so we can set a
-                  // relatively
-                  // low
-                  // stator current limit to help avoid brownouts without impacting performance.
-                  .withStatorCurrentLimit(Amps.of(Constants.INTAKE_CURRENT_LIMIT))
-                  .withStatorCurrentLimitEnable(true));
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    // Swerve azimuth does not require much torque output, so we can set a
+                    // relatively
+                    // low
+                    // stator current limit to help avoid brownouts without impacting performance.
+                    .withStatorCurrentLimit(Amps.of(Constants.INTAKE_CURRENT_LIMIT))
+                    .withStatorCurrentLimitEnable(true));
     rollers.getConfigurator().apply(rollerMotorConfigs);
 
     // Set motor to Brake mode by default.
@@ -69,17 +47,16 @@ public class IntakeIOMotor implements IntakeIO {
   @Override
   public void updateInputs(IntakeIOInputsAutoLogged inputsAutoLogged) {
 
-    //will update PID every tick
+    // will update PID every tick
     if (controlType == VTControlType.POSITION_PID) updatePID();
 
     inputsAutoLogged.targetSpeed = targetSpeed;
     inputsAutoLogged.targetPosition = targetPosition;
 
-    inputsAutoLogged.rollersCurrent = getCurrent();
     inputsAutoLogged.rollerVolts = getVoltage();
 
-    inputsAutoLogged.rollersEncoder = rollers.getPosition().getValueAsDouble();
-    inputsAutoLogged.rollersSpeed = rollers.get();
+    inputsAutoLogged.position = rollers.getPosition().getValueAsDouble();
+    inputsAutoLogged.rollerSpeed = rollers.get();
 
     inputsAutoLogged.controlType = controlType.name();
   }
@@ -132,7 +109,8 @@ public class IntakeIOMotor implements IntakeIO {
     setVoltage(0);
 
     controlType = VTControlType.MANUAL;
-  };
+  }
+  ;
 
   @Override
   public void resetEncoders() {
@@ -145,7 +123,7 @@ public class IntakeIOMotor implements IntakeIO {
   // gets the highest possible height of the arm in radians
   @Override
   public double getMaxPosition() {
-    return maxPosition;
+    return Constants.INTAKE_MAX_POSITION;
   }
 
   // gets the height of the arm in meters
@@ -156,7 +134,7 @@ public class IntakeIOMotor implements IntakeIO {
 
   @Override
   public boolean isMaxPosition() {
-    return getMaxPosition() - getPosition() < tolerance;
+    return getMaxPosition() - getPosition() < Constants.INTAKE_TOLERANCE;
   }
 
   @Override
