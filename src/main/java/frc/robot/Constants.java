@@ -30,6 +30,7 @@ public final class Constants {
   // angles
   public static final double ARM_SCORING_ANGLE = 0;
   public static final double ARM_INTAKE_ANGLE = 4;
+  public static final double ARM_MIN_ANGLE = 0;
 
   // controller constants
   public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;

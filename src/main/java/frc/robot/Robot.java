@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.simulation.SimulationManager;
 import frc.robot.util.simulation.VisualSimulator;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -44,6 +45,9 @@ public class Robot extends LoggedRobot {
 
   private VisualSimulator armMechanism;
   private VisualSimulator intakeMechanism;
+
+  // sets wether or not the arm is automatically controlled through the canrange
+  @AutoLogOutput private static boolean armManualControl = false;
 
   public Robot() {
     // Record metadata
@@ -180,6 +184,9 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }
+
+    // this way the arm does not automatically move during auto
+    setArmManualControl(true);
   }
 
   /** This function is called periodically during autonomous. */
@@ -196,6 +203,9 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    // this way the robot doesn't automatically move it's arm
+    setArmManualControl(true);
   }
 
   /** This function is called periodically during operator control. */
@@ -220,4 +230,14 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  /** Sets wether or not the arm's angle is currently being controlled by the canrange */
+  public static void setArmManualControl(boolean manual) {
+    armManualControl = manual;
+  }
+
+  /** gets wether or not the arm's angle is currently being controlled by the canrange. */
+  public static boolean isArmManualControl() {
+    return armManualControl;
+  }
 }
