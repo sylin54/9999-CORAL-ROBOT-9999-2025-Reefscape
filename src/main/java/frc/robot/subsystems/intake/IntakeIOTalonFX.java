@@ -6,22 +6,6 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
-/* 
-public class IntakeIOMotor implements IntakeIO {
-  private TalonFX intakemotor = new TalonFX(0);
-
-  public void SetMotorSpeed(double Speed) {
-    intakemotor.set(Speed);
-  }
-
-  public void updateInputs(IntakeIOInputsAutoLogged inputs) {
-    inputs.CurrentMotorSpeed = intakemotor.get();
-    inputs.CurrentMotorVoltage = intakemotor.getMotorVoltage(true).getValueAsDouble();
-    inputs.CurrentMotorAmps = intakemotor.getStatorCurrent().getValueAsDouble();
-  }
-}
-  */
 import edu.wpi.first.math.controller.PIDController;
 import frc.robot.Constants;
 import frc.robot.util.VTControlType;
@@ -44,15 +28,15 @@ public class IntakeIOTalonFX implements IntakeIO {
     rebuildMotorsPID();
 
     TalonFXConfiguration rollerMotorConfigs =
-      new TalonFXConfiguration()
-          .withCurrentLimits(
-              new CurrentLimitsConfigs()
-                  // Swerve azimuth does not require much torque output, so we can set a
-                  // relatively
-                  // low
-                  // stator current limit to help avoid brownouts without impacting performance.
-                  .withStatorCurrentLimit(Amps.of(Constants.INTAKE_CURRENT_LIMIT))
-                  .withStatorCurrentLimitEnable(true));
+        new TalonFXConfiguration()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    // Swerve azimuth does not require much torque output, so we can set a
+                    // relatively
+                    // low
+                    // stator current limit to help avoid brownouts without impacting performance.
+                    .withStatorCurrentLimit(Amps.of(Constants.INTAKE_CURRENT_LIMIT))
+                    .withStatorCurrentLimitEnable(true));
     rollers.getConfigurator().apply(rollerMotorConfigs);
 
     // Set motor to Brake mode by default.
@@ -63,7 +47,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   @Override
   public void updateInputs(IntakeIOInputsAutoLogged inputsAutoLogged) {
 
-    //will update PID every tick
+    // will update PID every tick
     if (controlType == VTControlType.POSITION_PID) updatePID();
 
     inputsAutoLogged.targetSpeed = targetSpeed;
@@ -72,7 +56,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputsAutoLogged.rollerVolts = getVoltage();
 
     inputsAutoLogged.position = rollers.getPosition().getValueAsDouble();
-    inputsAutoLogged.rollerSpeed = rollers.get(); 
+    inputsAutoLogged.rollerSpeed = rollers.get();
 
     inputsAutoLogged.controlType = controlType.name();
   }
@@ -125,7 +109,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     setVoltage(0);
 
     controlType = VTControlType.MANUAL;
-  };
+  }
+  ;
 
   @Override
   public void resetEncoders() {

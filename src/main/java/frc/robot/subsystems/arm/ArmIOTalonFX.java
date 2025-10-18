@@ -9,17 +9,16 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import frc.robot.Constants;
 
 public class ArmIOTalonFX implements ArmIO {
 
-    private TalonFX arm;
+  private TalonFX arm;
 
-    public ArmIOTalonFX(int armID, String canbusName) {
-        arm = new TalonFX(armID, canbusName);
+  public ArmIOTalonFX(int armID, String canbusName) {
+    arm = new TalonFX(armID, canbusName);
 
-        TalonFXConfiguration armMotorConfigs =
+    TalonFXConfiguration armMotorConfigs =
         new TalonFXConfiguration()
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
@@ -32,84 +31,82 @@ public class ArmIOTalonFX implements ArmIO {
             .withMotorOutput(
                 new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
 
-        var slot0Configs = armMotorConfigs.Slot0;
-        slot0Configs.kS = Constants.ARM_kS; // Add 0.25 V output to overcome static friction
-        slot0Configs.kV = Constants.ARM_kV; // A velocity target of 1 rps results in 0.12 V output
-        slot0Configs.kA = Constants.ARM_kA; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0Configs.kP = Constants.ARM_kP; // A position error of 2.5 rotations results in 12 V output
-        slot0Configs.kI = Constants.ARM_kI; // no output for integrated error
-        slot0Configs.kD = Constants.ARM_kD; // A velocity error of 1 rps results in 0.1 V output
-    
-        var motionMagicConfigs = armMotorConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = Constants.ARM_SPEED_LIMIT;
-        motionMagicConfigs.MotionMagicAcceleration = Constants.ARM_ACCELERATION_LIMIT;
-        motionMagicConfigs.MotionMagicJerk = Constants.ARM_JERK_LIMIT;
+    var slot0Configs = armMotorConfigs.Slot0;
+    slot0Configs.kS = Constants.ARM_kS; // Add 0.25 V output to overcome static friction
+    slot0Configs.kV = Constants.ARM_kV; // A velocity target of 1 rps results in 0.12 V output
+    slot0Configs.kA = Constants.ARM_kA; // An acceleration of 1 rps/s requires 0.01 V output
+    slot0Configs.kP = Constants.ARM_kP; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kI = Constants.ARM_kI; // no output for integrated error
+    slot0Configs.kD = Constants.ARM_kD; // A velocity error of 1 rps results in 0.1 V output
 
-        arm.getConfigurator().apply(armMotorConfigs);
+    var motionMagicConfigs = armMotorConfigs.MotionMagic;
+    motionMagicConfigs.MotionMagicCruiseVelocity = Constants.ARM_SPEED_LIMIT;
+    motionMagicConfigs.MotionMagicAcceleration = Constants.ARM_ACCELERATION_LIMIT;
+    motionMagicConfigs.MotionMagicJerk = Constants.ARM_JERK_LIMIT;
 
-        // Set motor to Brake mode by default.
-        arm.setNeutralMode(NeutralModeValue.Brake);
-    }
+    arm.getConfigurator().apply(armMotorConfigs);
 
-    // sets the PID target angle
-    @Override
-    public void PIDVoltage(double targetAngle) {
-        final MotionMagicVoltage m_request = new MotionMagicVoltage(0);
+    // Set motor to Brake mode by default.
+    arm.setNeutralMode(NeutralModeValue.Brake);
+  }
 
-        // set target position to 100 rotations
-        arm.setControl(m_request.withPosition(targetAngle));
-        // System.out.println("Voltage being sent in PID Voltage");
-    }
+  // sets the PID target angle
+  @Override
+  public void PIDVoltage(double targetAngle) {
+    final MotionMagicVoltage m_request = new MotionMagicVoltage(0);
 
-    // advantage kti logging stuff
-    @Override
-        public void updateInputs(ArmIOInputsAutoLogged inputs) {
-        inputs.armMotor1CurrentHeightMeter = getAngle();
-        inputs.armMotor1CurrentSpeedMeter = getRollerSpeed();
+    // set target position to 100 rotations
+    arm.setControl(m_request.withPosition(targetAngle));
+    // System.out.println("Voltage being sent in PID Voltage");
+  }
 
-        inputs.armMotor1CurrentAmps = getCurrent();
-        inputs.armMotor1AppliedVolts = getVoltage();
+  // advantage kti logging stuff
+  @Override
+  public void updateInputs(ArmIOInputsAutoLogged inputs) {
+    inputs.armMotor1CurrentHeightMeter = getAngle();
+    inputs.armMotor1CurrentSpeedMeter = getRollerSpeed();
 
-        inputs.armMotor2CurrentAmps = 0;
-        inputs.armMotor2AppliedVolts = 0;
+    inputs.armMotor1CurrentAmps = getCurrent();
+    inputs.armMotor1AppliedVolts = getVoltage();
 
-        inputs.armMotor2CurrentSpeedMeter = 0;
-        inputs.armMotor2CurrentHeightMeter = 0;
+    inputs.armMotor2CurrentAmps = 0;
+    inputs.armMotor2AppliedVolts = 0;
 
-        inputs.isStalled = false; //ask about this
-    }
+    inputs.armMotor2CurrentSpeedMeter = 0;
+    inputs.armMotor2CurrentHeightMeter = 0;
 
-    // no extra stuff here, just stop the motor
-    @Override
-    public void stop() {
-        setVoltage(0);  
-    }
+    inputs.isStalled = false; // ask about this
+  }
 
-    // this is sim so kinda gotta estimate
-    @Override
-    public double getMaxAngle() {
-       return Constants.ARM_MAX_ANGLE;
-    }
+  // no extra stuff here, just stop the motor
+  @Override
+  public void stop() {
+    setVoltage(0);
+  }
 
-    @Override
-    public void setVoltage(double volt) {
-        arm.setVoltage(volt);
-    }
+  // this is sim so kinda gotta estimate
+  @Override
+  public double getMaxAngle() {
+    return Constants.ARM_MAX_ANGLE;
+  }
 
-    @Override
-    public void resetEncoders() {
-        arm.setPosition(0);
-    }
+  @Override
+  public void setVoltage(double volt) {
+    arm.setVoltage(volt);
+  }
 
-    @Override
-    public double getAngle() {
-        return arm.getPosition().getValueAsDouble();
-    }
+  @Override
+  public void resetEncoders() {
+    arm.setPosition(0);
+  }
 
-    @Override
-    public boolean isMaxAngle() {
-        return Math.abs(getMaxAngle() - getAngle()) > Constants.ARM_TOLERANCE;
-    }
+  @Override
+  public double getAngle() {
+    return arm.getPosition().getValueAsDouble();
+  }
 
-
+  @Override
+  public boolean isMaxAngle() {
+    return Math.abs(getMaxAngle() - getAngle()) > Constants.ARM_TOLERANCE;
+  }
 }

@@ -8,15 +8,11 @@ public class RangeFinderIOCanrange implements RangeFinderIO {
 
   public RangeFinderIOCanrange(int canrangeID, String canbusName) {
     this.canrange = new CANrange(canrangeID, canbusName);
-
-
   }
 
   public void updateInputs(RangeFinderIOInputsAutoLogged inputsAutoLogged) {
     inputsAutoLogged.canRangeDistance = getDistance();
   }
-
-
 
   // gets the distance of the can rnage
   public double getDistance() {
