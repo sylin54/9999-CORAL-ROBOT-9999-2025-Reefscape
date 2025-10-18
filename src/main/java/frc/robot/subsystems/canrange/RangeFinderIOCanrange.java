@@ -2,11 +2,11 @@ package frc.robot.subsystems.canrange;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
-public class RangeFinderCanrangeIO implements RangeFinderIO {
+public class RangeFinderIOCanrange implements RangeFinderIO {
 
   private CANrange canrange;
 
-  public RangeFinderCanrangeIO(int canrangeID, String canbusName) {
+  public RangeFinderIOCanrange(int canrangeID, String canbusName) {
     this.canrange = new CANrange(canrangeID, canbusName);
 
 
