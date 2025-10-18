@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.793494318181818,
-        "y": 5.635411931818182
+        "x": 5.947179487179486,
+        "y": 5.4389102564102565
       },
       "isLocked": false,
       "linkedName": "CoralRobotMidStartPoint"
@@ -20,8 +20,8 @@
         "y": 5.326292613636363
       },
       "prevControl": {
-        "x": 5.2949147727272745,
-        "y": 6.0542187499999995
+        "x": 5.4208333333333325,
+        "y": 6.29551282051282
       },
       "nextControl": null,
       "isLocked": false,

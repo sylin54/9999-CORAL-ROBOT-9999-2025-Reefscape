@@ -9,6 +9,18 @@
           "data": {
             "pathName": "Mid start Point to top score"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top score to intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "intake to top score"
+          }
         }
       ]
     }
