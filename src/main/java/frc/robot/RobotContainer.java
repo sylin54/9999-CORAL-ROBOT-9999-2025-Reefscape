@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -169,10 +168,10 @@ public class RobotContainer {
         // set the arm height to the floor
         arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
             .alongWith(
-                //intakes
+                // intakes
                 intake
                     .setTargetSpeedCommand(Constants.INTAKE_SPEED)
-                    //when it notices a coral inside it vibrates the controller
+                    // when it notices a coral inside it vibrates the controller
                     .until(() -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE)
                     .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
                     .andThen(
