@@ -46,8 +46,10 @@ public final class Constants {
   //controller constants
   public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
 
-  //intake roller constants
-  public static final double INTAKE_CURRENT_LIMIT = 100;
+  //intake constants
+  public static final double INTAKE_CURRENT_LIMIT = 1 ; //originall at 100, need to do subsystem testing to find this. At 1 rn for testing.
+  public static double INTAKE_MAX_POSITION = 0.0;
+  public static double INTAKE_TOLERANCE = 0.1;
 
   public static boolean isFlipped() {
     return DriverStation.getAlliance().isPresent()

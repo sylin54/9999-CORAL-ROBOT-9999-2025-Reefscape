@@ -22,28 +22,22 @@ public class IntakeIOMotor implements IntakeIO {
   }
 }
   */
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 import frc.robot.util.VTControlType;
 
-public class IntakeIOMotor implements IntakeIO {
+public class IntakeIOTalonFX implements IntakeIO {
 
   private PIDController controller;
 
-  protected double tolerance = 0.1;
   protected double targetPosition = 0;
-  protected double maxPosition = 0.0;
   protected double targetSpeed = 0;
 
   private VTControlType controlType = VTControlType.MANUAL;
 
   private TalonFX rollers;
 
-  public IntakeIOMotor(int rollerID, String canbusName) {
+  public IntakeIOTalonFX(int rollerID, String canbusName) {
 
     rollers = new TalonFX(rollerID, canbusName);
 
@@ -75,11 +69,10 @@ public class IntakeIOMotor implements IntakeIO {
     inputsAutoLogged.targetSpeed = targetSpeed;
     inputsAutoLogged.targetPosition = targetPosition;
 
-    inputsAutoLogged.rollersCurrent = getCurrent();
     inputsAutoLogged.rollerVolts = getVoltage();
 
-    inputsAutoLogged.rollersEncoder = rollers.getPosition().getValueAsDouble();
-    inputsAutoLogged.rollersSpeed = rollers.get();
+    inputsAutoLogged.position = rollers.getPosition().getValueAsDouble();
+    inputsAutoLogged.rollerSpeed = rollers.get(); 
 
     inputsAutoLogged.controlType = controlType.name();
   }
@@ -145,7 +138,7 @@ public class IntakeIOMotor implements IntakeIO {
   // gets the highest possible height of the arm in radians
   @Override
   public double getMaxPosition() {
-    return maxPosition;
+    return Constants.INTAKE_MAX_POSITION;
   }
 
   // gets the height of the arm in meters
@@ -156,7 +149,7 @@ public class IntakeIOMotor implements IntakeIO {
 
   @Override
   public boolean isMaxPosition() {
-    return getMaxPosition() - getPosition() < tolerance;
+    return getMaxPosition() - getPosition() < Constants.INTAKE_TOLERANCE;
   }
 
   @Override
