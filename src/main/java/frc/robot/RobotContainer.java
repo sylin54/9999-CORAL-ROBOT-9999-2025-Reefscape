@@ -156,14 +156,6 @@ public class RobotContainer {
                 () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
             .andThen(new TellCommand("Default command")));
 
-    // SmartDashboard.putData(
-    //     "intake command",
-    //     (Sendable)
-    //         this.arm
-    //             .setTargetHeightCommand(4)
-    //             .alongWith(intake.intakeUntilCanRangeIsDetected(5, 1)).until(() ->
-    // canrange.getCanDistance() < 1));
-
     // if the canrange doesn't see anything set rollers to intake speed
     Command intakeCommand =
         new ConditionalCommand(
@@ -191,30 +183,6 @@ public class RobotContainer {
     controller.leftTrigger().whileTrue(intakeCommand);
 
     controller.rightTrigger().whileTrue(scoringCommand);
-
-    // SmartDashboard.putData(
-    //     "intake command", intakeCommand.andThen(new WaitUntilCommand(() -> false)));
-    // SmartDashboard.putData(
-    //     "scoring command", scoringCommand.andThen(new WaitUntilCommand(() -> false)));
-
-    // .andThen(new WaitUntilCommand(() -> false))
-
-    SmartDashboard.putData(
-        "arm set target angle 0", (Sendable) this.arm.setTargetHeightCommandConsistentEnd(0));
-    SmartDashboard.putData(
-        "arm set target angle 5", (Sendable) this.arm.setTargetHeightCommandConsistentEnd(5));
-
-    SmartDashboard.putData(
-        "intake set target speed 5", (Sendable) this.intake.setTargetSpeedCommand(5));
-    SmartDashboard.putData(
-        "intake set target speed 0", (Sendable) this.intake.setTargetSpeedCommand(0));
-    SmartDashboard.putData(
-        "intake set target speed -5", (Sendable) this.intake.setTargetSpeedCommand(-5));
-
-    SmartDashboard.putData(
-        "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
-    SmartDashboard.putData(
-        "set canrange vision 5", (Sendable) this.canrange.setCanrangeDistanceCommand(5));
   }
 
   /**

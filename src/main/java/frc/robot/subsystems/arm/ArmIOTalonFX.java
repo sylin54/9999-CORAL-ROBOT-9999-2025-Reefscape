@@ -10,12 +10,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 
 public class ArmIOTalonFX implements ArmIO {
@@ -67,55 +61,55 @@ public class ArmIOTalonFX implements ArmIO {
         // System.out.println("Voltage being sent in PID Voltage");
     }
 
-  // advantage kti logging stuff
-  @Override
-  public void updateInputs(ArmIOInputsAutoLogged inputs) {
-    inputs.armMotor1CurrentHeightMeter = getAngle();
-    inputs.armMotor1CurrentSpeedMeter = getRollerSpeed();
+    // advantage kti logging stuff
+    @Override
+        public void updateInputs(ArmIOInputsAutoLogged inputs) {
+        inputs.armMotor1CurrentHeightMeter = getAngle();
+        inputs.armMotor1CurrentSpeedMeter = getRollerSpeed();
 
-    inputs.armMotor1CurrentAmps = getCurrent();
-    inputs.armMotor1AppliedVolts = getVoltage();
+        inputs.armMotor1CurrentAmps = getCurrent();
+        inputs.armMotor1AppliedVolts = getVoltage();
 
-    inputs.armMotor2CurrentAmps = 0;
-    inputs.armMotor2AppliedVolts = 0;
+        inputs.armMotor2CurrentAmps = 0;
+        inputs.armMotor2AppliedVolts = 0;
 
-    inputs.armMotor2CurrentSpeedMeter = 0;
-    inputs.armMotor2CurrentHeightMeter = 0;
+        inputs.armMotor2CurrentSpeedMeter = 0;
+        inputs.armMotor2CurrentHeightMeter = 0;
 
-    inputs.isStalled = false; //ask about this
-  }
+        inputs.isStalled = false; //ask about this
+    }
 
-  // no extra stuff here, just stop the motor
-  @Override
-  public void stop() {
-    setVoltage(0);
-  }
+    // no extra stuff here, just stop the motor
+    @Override
+    public void stop() {
+        setVoltage(0);  
+    }
 
-  // this is sim so kinda gotta estimate
-  @Override
-  public double getMaxAngle() {
-    return Constants.ARM_MAX_ANGLE;
-  }
+    // this is sim so kinda gotta estimate
+    @Override
+    public double getMaxAngle() {
+       return Constants.ARM_MAX_ANGLE;
+    }
 
-  @Override
-  public void setVoltage(double volt) {
-    arm.setVoltage(volt);
-  }
+    @Override
+    public void setVoltage(double volt) {
+        arm.setVoltage(volt);
+    }
 
-  @Override
-  public void resetEncoders() {
-    arm.setPosition(0);
-  }
+    @Override
+    public void resetEncoders() {
+        arm.setPosition(0);
+    }
 
-  @Override
-  public double getAngle() {
-    return arm.getPosition().getValueAsDouble();
-  }
+    @Override
+    public double getAngle() {
+        return arm.getPosition().getValueAsDouble();
+    }
 
-  @Override
-  public boolean isMaxAngle() {
-    return Math.abs(getMaxAngle() - getAngle()) > Constants.ARM_TOLERANCE;
-  }
+    @Override
+    public boolean isMaxAngle() {
+        return Math.abs(getMaxAngle() - getAngle()) > Constants.ARM_TOLERANCE;
+    }
 
 
 }
