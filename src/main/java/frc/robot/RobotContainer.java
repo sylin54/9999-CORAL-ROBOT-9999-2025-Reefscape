@@ -155,7 +155,7 @@ public class RobotContainer {
         Commands.either(
                 intake.setTargetSpeedCommand(0),
                 intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
-                () -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE)
+                () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
             .andThen(new TellCommand("Default command")));
 
     // if the canrange doesn't see anything set rollers to intake speed
@@ -178,7 +178,7 @@ public class RobotContainer {
                         arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
 
     Command scoringCommand =
-        new InstantCommand(() -> Robot.setArmManualControl(false))
+        new InstantCommand(() -> Robot.setArmManualControl(true))
             .andThen(
                 arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
                     .andThen(intake.setTargetSpeedCommand(Constants.EJECT_SPEED))
@@ -196,8 +196,11 @@ public class RobotContainer {
             new InstantCommand(() -> Robot.setArmManualControl(true))
                 .andThen(arm.setTargetHeightCommand(Constants.ARM_MIN_ANGLE)));
 
-    controller.leftBumper().whileTrue(new InstantCommand(() -> Robot.setArmManualControl(true)).andThen(
-        arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
+    controller
+        .leftBumper()
+        .whileTrue(
+            new InstantCommand(() -> Robot.setArmManualControl(true))
+                .andThen(arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
 
     controller.povLeft().whileTrue(intake.setTargetSpeedCommand(Constants.EJECT_SPEED));
     controller.povRight().whileTrue(intake.setTargetSpeedCommand(Constants.INTAKE_SPEED));
