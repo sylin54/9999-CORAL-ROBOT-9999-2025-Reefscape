@@ -15,6 +15,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -228,8 +229,27 @@ public class RobotContainer {
 
     boolean isReal = false;
 
-    addNamedCommand("CoralScore", getAutonomousCommand(), isReal);
-    addNamedCommand("PrepCoralScore", getAutonomousCommand(), isReal);
+    addNamedCommand(
+        "CoralScore",
+        arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
+            .andThen(
+                intake
+                    .setTargetSpeedCommand(Constants.EJECT_SPEED)
+                    .withDeadline(new WaitCommand(Constants.CORAL_RELEASE_TIME))),
+        isReal);
+    addNamedCommand(
+        "PrepCoralScore", arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE), isReal);
+    addNamedCommand(
+        "PrepCoralIntake", arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE), isReal);
+    addNamedCommand(
+        "CoralIntake",
+        arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
+            .andThen(
+                intake
+                    .setTargetSpeedCommand(Constants.INTAKE_SPEED)
+                    .until(
+                        () -> canrange.getCanDistance() < Constants.CANRANGE_DETECTION_DISTANCE)),
+        isReal);
   }
 
   /**
@@ -241,24 +261,35 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
-    /**function to add named commands because we need to add is an an event too and not just as a
-     * command. This also handles simulation logging */
-    public void addNamedCommand(String commandName, Command command, boolean isReal) {
+  /**
+   * function to add named commands because we need to add is an an event too and not just as a
+   * command. This also handles simulation logging
+   */
+  public void addNamedCommand(String commandName, Command command, boolean isReal) {
 
-        if (isReal) {
-        NamedCommands.registerCommand(
-            commandName, command.andThen(new TellCommand("just ran " + commandName)));
-        //   new EventTrigger(commandName).onTrue(command);
-        } else {
-        // registers the named commands to print something out instead of actually running anything
-        NamedCommands.registerCommand(
-            commandName,
-            new TellCommand(commandName + " auto command")
-                .andThen(
-                    new ControllerVibrateCommand(1, controller).withDeadline(new WaitCommand(0.2)))
-                .alongWith(command));
-        }
+    if (isReal) {
+      NamedCommands.registerCommand(
+          commandName, command.andThen(new TellCommand("just ran " + commandName)));
+          
+        new EventTrigger(commandName).onTrue(command);
+    } else {
+      // registers the named commands to print something out instead of actually running anything
+      NamedCommands.registerCommand(
+          commandName,
+          new TellCommand(commandName + " auto command")
+              .andThen(
+                  new ControllerVibrateCommand(1, controller).withDeadline(new WaitCommand(0.2)))
+              .alongWith(command));
+
+                new EventTrigger(commandName)
+            .onTrue(
+                new TellCommand(commandName + " auto event trigger command")
+                    .andThen(
+                        new ControllerVibrateCommand(1, controller)
+                            .withDeadline(new WaitCommand(0.2)))
+                    .andThen(new WaitCommand(0.3)));
     }
+  }
 
   public Arm getArm() {
     return arm;
