@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "CoralScore"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "top score to intake"
@@ -20,6 +26,12 @@
           "type": "path",
           "data": {
             "pathName": "intake to top score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralScore"
           }
         }
       ]

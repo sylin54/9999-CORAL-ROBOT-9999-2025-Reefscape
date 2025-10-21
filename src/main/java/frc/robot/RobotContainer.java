@@ -14,6 +14,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -118,6 +120,8 @@ public class RobotContainer {
         break;
     }
 
+    registerNamedCommandsAuto();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -220,6 +224,14 @@ public class RobotContainer {
                 .ignoringDisable(true));
   }
 
+  public void registerNamedCommandsAuto() {
+
+    boolean isReal = false;
+
+    addNamedCommand("CoralScore", getAutonomousCommand(), isReal);
+    addNamedCommand("PrepCoralScore", getAutonomousCommand(), isReal);
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -228,6 +240,25 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+    /**function to add named commands because we need to add is an an event too and not just as a
+     * command. This also handles simulation logging */
+    public void addNamedCommand(String commandName, Command command, boolean isReal) {
+
+        if (isReal) {
+        NamedCommands.registerCommand(
+            commandName, command.andThen(new TellCommand("just ran " + commandName)));
+        //   new EventTrigger(commandName).onTrue(command);
+        } else {
+        // registers the named commands to print something out instead of actually running anything
+        NamedCommands.registerCommand(
+            commandName,
+            new TellCommand(commandName + " auto command")
+                .andThen(
+                    new ControllerVibrateCommand(1, controller).withDeadline(new WaitCommand(0.2)))
+                .alongWith(command));
+        }
+    }
 
   public Arm getArm() {
     return arm;

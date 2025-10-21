@@ -8,30 +8,58 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.947179487179486,
-        "y": 5.4389102564102565
+        "x": 6.968910256410257,
+        "y": 5.696923076923076
       },
       "isLocked": false,
       "linkedName": "CoralRobotMidStartPoint"
     },
     {
       "anchor": {
-        "x": 3.7194034090909094,
-        "y": 5.326292613636363
+        "x": 3.635384615384615,
+        "y": 5.449230769230769
       },
       "prevControl": {
-        "x": 5.4208333333333325,
-        "y": 6.29551282051282
+        "x": 3.336089743589744,
+        "y": 6.068461538461538
+      },
+      "nextControl": {
+        "x": 3.7441767805196813,
+        "y": 5.224143531020286
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.790192307692307,
+        "y": 5.211858974358974
+      },
+      "prevControl": {
+        "x": 3.6147435897435893,
+        "y": 5.4698717948717945
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "CoralRobotTopBackScore"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.7929824561403058,
+      "rotationDegrees": -59.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "PrepCoralScore",
+      "waypointRelativePos": 0.08416389811739164,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
