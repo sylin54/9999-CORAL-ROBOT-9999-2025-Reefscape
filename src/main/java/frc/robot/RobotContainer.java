@@ -143,19 +143,19 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    arm.setDefaultCommand(
-        Commands.either(
-                arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE),
-                arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
-                () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
-            .unless(() -> Robot.isArmManualControl()));
+    // arm.setDefaultCommand(
+    //     Commands.either(
+    //             arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE),
+    //             arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
+    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+    //         .unless(() -> Robot.isArmManualControl()));
 
-    intake.setDefaultCommand(
-        Commands.either(
-                intake.setTargetSpeedCommand(0),
-                intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
-                () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
-            .andThen(new TellCommand("Default command")));
+    // intake.setDefaultCommand(
+    //     Commands.either(
+    //             intake.setTargetSpeedCommand(0),
+    //             intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
+    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+    //         .andThen(new TellCommand("Default command")));
 
     // if the canrange doesn't see anything set rollers to intake speed
     // Command intakeCommand =
@@ -205,9 +205,9 @@ public class RobotContainer {
                         new WaitCommand(Constants.CORAL_RELEASE_TIME)
                             .andThen(new ControllerVibrateCommand(0.2, controller))));
 
-    controller.leftTrigger().whileTrue(intakeCommand);
+    // controller.leftTrigger().whileTrue(intakeCommand);
 
-    controller.rightTrigger().whileTrue(scoringCommand);
+    // controller.rightTrigger().whileTrue(scoringCommand);
 
     controller
         .rightBumper()
@@ -226,14 +226,14 @@ public class RobotContainer {
     controller.povUp().whileTrue(intake.setTargetSpeedCommand(Constants.HOLDING_SPEED));
 
     // manual controls
-    controller
-        .povDown()
-        .onTrue(
-            new InstantCommand(() -> Robot.setArmManualControl(!Robot.isArmManualControl()))
-                .andThen(
-                    new ControllerVibrateCommand(0.4, controller)
-                        .withDeadline(new WaitCommand(0.7))
-                        .unless(() -> !Robot.isArmManualControl())));
+    // controller
+    //     .povDown()
+    //     .onTrue(
+    //         new InstantCommand(() -> Robot.setArmManualControl(!Robot.isArmManualControl()))
+    //             .andThen(
+    //                 new ControllerVibrateCommand(0.4, controller)
+    //                     .withDeadline(new WaitCommand(0.7))
+    //                     .unless(() -> !Robot.isArmManualControl())));
 
     SmartDashboard.putData(
         "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
