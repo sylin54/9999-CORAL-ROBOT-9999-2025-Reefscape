@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.Constants;
@@ -29,7 +30,7 @@ public class ArmIOTalonFX implements ArmIO {
                     .withStatorCurrentLimit(Amps.of(Constants.ARM_CURRENT_LIMIT))
                     .withStatorCurrentLimitEnable(true))
             .withMotorOutput(
-                new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive));
+                new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive));
 
     var slot0Configs = armMotorConfigs.Slot0;
     slot0Configs.kS = Constants.ARM_kS; // Add 0.25 V output to overcome static friction
@@ -38,6 +39,8 @@ public class ArmIOTalonFX implements ArmIO {
     slot0Configs.kP = Constants.ARM_kP; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = Constants.ARM_kI; // no output for integrated error
     slot0Configs.kD = Constants.ARM_kD; // A velocity error of 1 rps results in 0.1 V output
+    slot0Configs.kG = Constants.ARM_kG; // account for the weight of the arm
+    slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
 
     var motionMagicConfigs = armMotorConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = Constants.ARM_SPEED_LIMIT;

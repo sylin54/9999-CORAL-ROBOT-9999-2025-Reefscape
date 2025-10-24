@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.communication.ControllerVibrateCommand;
-import frc.robot.commands.communication.TellCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
@@ -79,6 +78,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        // arm = new Arm(new ArmIOTalonFX(12, "rio"));
         arm = new Arm(new ArmIO() {});
 
         canrange = new RangeFinder(new RangeFinderIO() {});
@@ -179,7 +179,7 @@ public class RobotContainer {
 
     Command intakeCommand =
         // set the arm height to the floor
-        new InstantCommand(() -> Robot.setArmManualControl(false))
+        new InstantCommand(() -> Robot.setArmManualControl(true))
             .andThen(
                 arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
                     .alongWith(
@@ -205,9 +205,9 @@ public class RobotContainer {
                         new WaitCommand(Constants.CORAL_RELEASE_TIME)
                             .andThen(new ControllerVibrateCommand(0.2, controller))));
 
-    // controller.leftTrigger().whileTrue(intakeCommand);
+    controller.leftTrigger().whileTrue(intakeCommand);
 
-    // controller.rightTrigger().whileTrue(scoringCommand);
+    controller.rightTrigger().whileTrue(scoringCommand);
 
     controller
         .rightBumper()
@@ -215,15 +215,17 @@ public class RobotContainer {
             new InstantCommand(() -> Robot.setArmManualControl(true))
                 .andThen(arm.setTargetHeightCommand(Constants.ARM_MIN_ANGLE)));
 
-    controller
-        .leftBumper()
-        .whileTrue(
-            new InstantCommand(() -> Robot.setArmManualControl(true))
-                .andThen(arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
+    controller.start().onTrue(arm.resetEncodersCommand().ignoringDisable(true));
+
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(
+    //         new InstantCommand(() -> Robot.setArmManualControl(true))
+    //             .andThen(arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE)));
 
     controller.povLeft().whileTrue(intake.setTargetSpeedCommand(Constants.EJECT_SPEED));
     controller.povRight().whileTrue(intake.setTargetSpeedCommand(Constants.INTAKE_SPEED));
-    controller.povUp().whileTrue(intake.setTargetSpeedCommand(Constants.HOLDING_SPEED));
+    // controller.povUp().whileTrue(intake.setTargetSpeedCommand(Constants.HOLDING_SPEED));
 
     // manual controls
     // controller

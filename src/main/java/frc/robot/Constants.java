@@ -28,9 +28,9 @@ public final class Constants {
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   // angles
-  public static final double ARM_SCORING_ANGLE = 0;
-  public static final double ARM_INTAKE_ANGLE = 4;
-  public static final double ARM_MIN_ANGLE = 0;
+  public static final double ARM_SCORING_ANGLE = 0.5; // set
+  public static final double ARM_INTAKE_ANGLE = 11; // set
+  public static final double ARM_MIN_ANGLE = 0.1; // set
 
   // controller constants
   public static final double CONTROLLER_FEEDBACK_AMOUNT = 0.2;
@@ -41,27 +41,28 @@ public final class Constants {
   // controller sppeds
   public static final double INTAKE_SPEED = -1;
   public static final double EJECT_SPEED = 1;
-  public static final double HOLDING_SPEED = -0.02;
+  public static final double HOLDING_SPEED = 0;
 
   // canrange constants
   public static final double FREE_CANRANGE_DIST = 1;
   public static final double CANRANGE_DETECTION_DISTANCE = 1;
 
   // arm constants
-  public static final double ARM_kS = 0.25;
-  public static final double ARM_kV = 0.12;
-  public static final double ARM_kA = 0.01;
-  public static final double ARM_kP = 7.5;
-  public static final double ARM_kI = 0;
-  public static final double ARM_kD = 0.1;
-  public static final double ARM_kG = 0.2;
+  public static final double ARM_kS = 0; // set; default 0.25
+  public static final double ARM_kV = 0.25; // set; default 0.12
+  public static final double ARM_kA = 0; // set; default 0.01
+  public static final double ARM_kP = 0.35; // set; default Much too large
+  public static final double ARM_kI = 0; // set
+  public static final double ARM_kD = 0.28; // set; default 0.1
+  public static final double ARM_kG = 0; // set
 
-  public static final double ARM_SPEED_LIMIT = 3;
-  public static final double ARM_ACCELERATION_LIMIT = 2.5;
-  public static final double ARM_JERK_LIMIT = 10;
-  public static final double ARM_TOLERANCE = 0.1;
-  public static final double ARM_CURRENT_LIMIT = 1; // shoudl be 65, currently one for testing
-  public static final double ARM_MAX_ANGLE = 100;
+  public static final double ARM_SPEED_LIMIT = 6; // set; these are motionmagic constants
+  public static final double ARM_ACCELERATION_LIMIT = 9; // set
+  public static final double ARM_JERK_LIMIT = 0; // set
+  public static final double ARM_TOLERANCE = 0.1; // set
+  public static final double ARM_CURRENT_LIMIT =
+      20; // set // shoudl be 65, currently one for testing
+  public static final double ARM_MAX_ANGLE = 11; // set
 
   // var slot0Configs = armMotorConfigs.Slot0;
   // slot0Configs.kS = PWrist.kS.getValue(); // Add 0.25 V output to overcome static friction
@@ -99,13 +100,13 @@ public final class Constants {
     REPLAY
   }
 
-  public class CArm {
-    public static final double TOLERANCE = 0.1;
-    public static final double MANUAL_MAX_SPEED = 0.1;
-    public static final double MIN_HEIGHT = 0;
-    public static final double MAX_HEIGHT = 5;
-    public static final double CLEARANCE_ANGLE = 0.1;
-  }
+  // public class CArm {
+  //   public static final double TOLERANCE = 0.1;
+  //   public static final double MANUAL_MAX_SPEED = 0.1;
+  //   public static final double MIN_HEIGHT = 0;
+  //   public static final double MAX_HEIGHT = 5;
+  //   public static final double CLEARANCE_ANGLE = 0.1;
+  // }
 
   public class CIntake {
     // dummy values for now

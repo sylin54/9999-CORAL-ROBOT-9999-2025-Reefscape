@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants.CArm;
+import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -61,8 +61,8 @@ public class Arm extends SubsystemBase {
     // if manual override do a quick bounds check then retuorn
     if (manualOverride) {
 
-      if (getCurrentAngle() < CArm.MIN_HEIGHT - CArm.TOLERANCE
-          || getCurrentAngle() > CArm.MAX_HEIGHT) {
+      if (getCurrentAngle() < Constants.ARM_MIN_ANGLE - Constants.ARM_TOLERANCE
+          || getCurrentAngle() > Constants.ARM_MAX_ANGLE) {
         System.out.println("ARM OUT OF BOUDNS");
         setManualSpeed(0);
       }
@@ -72,8 +72,10 @@ public class Arm extends SubsystemBase {
     isOnTarget = isOnTarget();
 
     // Clamp target height to prevent exceeding limits
-    targetHeight = Math.max(0.0, Math.min(targetHeight, CArm.MAX_HEIGHT));
+    targetHeight =
+        Math.max(Constants.ARM_MIN_ANGLE, Math.min(targetHeight, Constants.ARM_MAX_ANGLE));
 
+    // should be commented bakc in
     moduleIO.PIDVoltage(targetHeight);
   }
 
@@ -82,15 +84,15 @@ public class Arm extends SubsystemBase {
 
     manualOverride = false;
 
-    targetHeight = Math.max(0.0, Math.min(height, CArm.MAX_HEIGHT));
+    targetHeight = Math.max(0.0, Math.min(height, Constants.ARM_MAX_ANGLE));
   }
 
   /** Allows manual control of the arm, bypassing PID. */
   public void setManualSpeed(double speed) {
     manualOverride = true;
 
-    if (Math.abs(speed) > CArm.MANUAL_MAX_SPEED)
-      speed = Math.copySign(CArm.MANUAL_MAX_SPEED, speed);
+    if (Math.abs(speed) > Constants.ARM_SPEED_LIMIT)
+      speed = Math.copySign(Constants.ARM_SPEED_LIMIT, speed);
     System.out.println("Above speed limit; rate limiting ARM speed.");
     moduleIO.setRollerSpeed(speed);
   }
@@ -98,7 +100,7 @@ public class Arm extends SubsystemBase {
   /** Holds the current position using PID control. */
   public void holdPositionPID() {
     manualOverride = false;
-    if (Math.abs(targetHeight - currentHeight) > CArm.TOLERANCE) {
+    if (Math.abs(targetHeight - currentHeight) > Constants.ARM_TOLERANCE) {
       targetHeight = currentHeight;
       moduleIO.PIDVoltage(targetHeight);
     }
@@ -132,7 +134,7 @@ public class Arm extends SubsystemBase {
 
   // returns wether or not the elevaotr is on target
   public boolean isOnTarget() {
-    return (Math.abs(currentHeight - targetHeight) < CArm.TOLERANCE);
+    return (Math.abs(currentHeight - targetHeight) < Constants.ARM_TOLERANCE);
   }
 
   /** resets encoders to read 0 and resets PID (setting it to begin at current height) */
@@ -147,7 +149,7 @@ public class Arm extends SubsystemBase {
 
   // returns wether or not the arm is clear from the arm
   public boolean isClearFromElevator() {
-    return getCurrentAngle() > CArm.CLEARANCE_ANGLE;
+    return getCurrentAngle() > 0;
   }
 
   // commands
