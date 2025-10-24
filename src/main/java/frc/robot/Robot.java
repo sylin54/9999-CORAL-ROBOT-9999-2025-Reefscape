@@ -16,9 +16,16 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.DriveMotorArrangement;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerMotorArrangement;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.generated.TunerConstants;
+import frc.robot.util.simulation.SimulationManager;
+import frc.robot.util.simulation.VisualSimulator;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -35,6 +42,12 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+
+  private VisualSimulator armMechanism;
+  private VisualSimulator intakeMechanism;
+
+  // sets wether or not the arm is automatically controlled through the canrange
+  @AutoLogOutput private static boolean armManualControl = false;
 
   public Robot() {
     // Record metadata
@@ -99,6 +112,38 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+
+    // simulation code, uses our library
+    armMechanism =
+        new VisualSimulator(
+            new Translation2d(0.3, 0),
+            () -> 90 - robotContainer.getArm().getCurrentAngle() * 15,
+            () -> Units.inchesToMeters(15),
+            Units.inchesToMeters(5),
+            new Color8Bit(Color.kYellow),
+            "arm mechanism 2d");
+
+    intakeMechanism =
+        new VisualSimulator(
+            new Translation2d(),
+            () -> armMechanism.getAngle().getDegrees() - 90,
+            () -> Units.inchesToMeters(5),
+            Units.inchesToMeters(5),
+            new Color8Bit(),
+            "intake mechanism 2d");
+
+    intakeMechanism.setParent(armMechanism);
+
+    intakeMechanism.setColorSupplier(
+        () -> {
+          if (robotContainer.getIntake().getRollerSpeed() > 0.1) {
+            return new Color8Bit(Color.kGreen);
+          } else if (robotContainer.getIntake().getRollerSpeed() < -0.1) {
+            return new Color8Bit(Color.kRed);
+          } else {
+            return new Color8Bit(Color.kAliceBlue);
+          }
+        });
   }
 
   /** This function is called periodically during all modes. */
@@ -117,6 +162,9 @@ public class Robot extends LoggedRobot {
 
     // Return to non-RT thread priority (do not modify the first argument)
     // Threads.setCurrentThreadPriority(false, 10);
+
+    // updates the robot simulation
+    SimulationManager.updateSim();
   }
 
   /** This function is called once when the robot is disabled. */
@@ -136,6 +184,9 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.schedule();
     }
+
+    // this way the arm does not automatically move during auto
+    setArmManualControl(true);
   }
 
   /** This function is called periodically during autonomous. */
@@ -152,6 +203,9 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+
+    // this way the robot doesn't automatically move it's arm
+    setArmManualControl(true);
   }
 
   /** This function is called periodically during operator control. */
@@ -176,4 +230,14 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically whilst in simulation. */
   @Override
   public void simulationPeriodic() {}
+
+  /** Sets wether or not the arm's angle is currently being controlled by the canrange */
+  public static void setArmManualControl(boolean manual) {
+    armManualControl = manual;
+  }
+
+  /** gets wether or not the arm's angle is currently being controlled by the canrange. */
+  public static boolean isArmManualControl() {
+    return armManualControl;
+  }
 }
