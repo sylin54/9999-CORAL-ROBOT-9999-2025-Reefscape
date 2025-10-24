@@ -31,6 +31,7 @@ import frc.robot.commands.communication.ControllerVibrateCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOTalonFX;
 import frc.robot.subsystems.arm.ArmSimulationIO;
 import frc.robot.subsystems.canrange.RangeFinder;
 import frc.robot.subsystems.canrange.RangeFinderIO;
@@ -44,6 +45,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSimulation;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -78,11 +80,11 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        // arm = new Arm(new ArmIOTalonFX(12, "rio"));
-        arm = new Arm(new ArmIO() {});
+        arm = new Arm(new ArmIOTalonFX(12, "rio"));
+        // arm = new Arm(new ArmIO() {});
 
         canrange = new RangeFinder(new RangeFinderIO() {});
-        intake = new Intake(new IntakeIO() {}, canrange);
+        intake = new Intake(new IntakeIOTalonFX(11, "rio"), canrange);
 
         break;
 
@@ -157,6 +159,8 @@ public class RobotContainer {
     //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
     //         .andThen(new TellCommand("Default command")));
 
+    intake.setDefaultCommand(intake.setTargetSpeedCommand(0));
+
     // if the canrange doesn't see anything set rollers to intake speed
     // Command intakeCommand =
     //     new InstantCommand(() -> Robot.setArmManualControl(false))
@@ -184,17 +188,16 @@ public class RobotContainer {
                 arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
                     .alongWith(
                         // intakes
-                        intake
-                            .setTargetSpeedCommand(Constants.INTAKE_SPEED)
-                            // when it notices a coral inside it vibrates the controller
-                            .until(
-                                () ->
-                                    canrange.getCanDistance()
-                                        < Constants.CANRANGE_DETECTION_DISTANCE)
-                            .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
-                            .andThen(
-                                new ControllerVibrateCommand(
-                                    Constants.CONTROLLER_FEEDBACK_AMOUNT, controller))));
+                        intake.setTargetSpeedCommand(Constants.INTAKE_SPEED)));
+    // whe[]\n it notices a coral inside it vibrates the controller
+    // .until(
+    //     () ->
+    //         canrange.getCanDistance()
+    //             < Constants.CANRANGE_DETECTION_DISTANCE)
+    // .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
+    // .andThen(
+    //     new ControllerVibrateCommand(Constants.CONTROLLER_FEEDBACK_AMOUNT, controller))))
+    ;
 
     Command scoringCommand =
         new InstantCommand(() -> Robot.setArmManualControl(true))

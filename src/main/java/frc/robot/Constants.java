@@ -29,7 +29,7 @@ public final class Constants {
 
   // angles
   public static final double ARM_SCORING_ANGLE = 0.5; // set
-  public static final double ARM_INTAKE_ANGLE = 11; // set
+  public static final double ARM_INTAKE_ANGLE = 11.3; // set
   public static final double ARM_MIN_ANGLE = 0.1; // set
 
   // controller constants
@@ -39,8 +39,8 @@ public final class Constants {
   public static final double CORAL_RELEASE_TIME = 1;
 
   // controller sppeds
-  public static final double INTAKE_SPEED = -1;
-  public static final double EJECT_SPEED = 1;
+  public static final double INTAKE_SPEED = 1;
+  public static final double EJECT_SPEED = -1;
   public static final double HOLDING_SPEED = 0;
 
   // canrange constants
@@ -80,7 +80,7 @@ public final class Constants {
 
   // intake constants
   public static final double INTAKE_CURRENT_LIMIT =
-      1; // originall at 100, need to do subsystem testing to find this. At 1 rn for testing.
+      20; // originall at 100, need to do subsystem testing to find this. At 1 rn for testing.
   public static double INTAKE_MAX_POSITION = 0.0;
   public static double INTAKE_TOLERANCE = 0.1;
 
