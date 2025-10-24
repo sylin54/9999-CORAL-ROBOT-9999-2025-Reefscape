@@ -16,7 +16,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -240,7 +239,7 @@ public class RobotContainer {
     addNamedCommand(
         "PrepCoralScore", arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE), isReal);
     addNamedCommand(
-        "PrepCoralIntake", arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE), isReal);
+        "PrepCoralIntake", arm.setTargetHeightCommand(Constants.ARM_xINTAKE_ANGLE), isReal);
     addNamedCommand(
         "CoralIntake",
         arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
@@ -270,8 +269,8 @@ public class RobotContainer {
     if (isReal) {
       NamedCommands.registerCommand(
           commandName, command.andThen(new TellCommand("just ran " + commandName)));
-          
-        new EventTrigger(commandName).onTrue(command);
+
+      new EventTrigger(commandName).onTrue(command);
     } else {
       // registers the named commands to print something out instead of actually running anything
       NamedCommands.registerCommand(
@@ -281,13 +280,13 @@ public class RobotContainer {
                   new ControllerVibrateCommand(1, controller).withDeadline(new WaitCommand(0.2)))
               .alongWith(command));
 
-                new EventTrigger(commandName)
-            .onTrue(
-                new TellCommand(commandName + " auto event trigger command")
-                    .andThen(
-                        new ControllerVibrateCommand(1, controller)
-                            .withDeadline(new WaitCommand(0.2)))
-                    .andThen(new WaitCommand(0.3)));
+      new EventTrigger(commandName)
+          .onTrue(
+              new TellCommand(commandName + " auto event trigger command")
+                  .andThen(
+                      new ControllerVibrateCommand(1, controller)
+                          .withDeadline(new WaitCommand(0.2)))
+                  .andThen(new WaitCommand(0.3)));
     }
   }
 
