@@ -16,20 +16,36 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.communication.ControllerVibrateCommand;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOTalonFX;
+import frc.robot.subsystems.arm.ArmSimulationIO;
+import frc.robot.subsystems.canrange.RangeFinder;
+import frc.robot.subsystems.canrange.RangeFinderIO;
+import frc.robot.subsystems.canrange.RangeFinderSimulationIO;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSimulation;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,6 +64,10 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  public final Arm arm;
+  public final RangeFinder canrange;
+  public final Intake intake;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -60,6 +80,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        arm = new Arm(new ArmIOTalonFX(12, "rio"));
+        // arm = new Arm(new ArmIO() {});
+
+        canrange = new RangeFinder(new RangeFinderIO() {});
+        intake = new Intake(new IntakeIOTalonFX(11, "rio"), canrange);
+
         break;
 
       case SIM:
@@ -71,6 +97,12 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+
+        arm = new Arm(new ArmSimulationIO());
+
+        canrange = new RangeFinder(new RangeFinderSimulationIO());
+        intake = new Intake(new IntakeIOSimulation(), canrange);
+
         break;
 
       default:
@@ -82,6 +114,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+
+        arm = new Arm(new ArmIO() {});
+
+        canrange = new RangeFinder(new RangeFinderIO() {});
+        intake = new Intake(new IntakeIO() {}, canrange);
+
         break;
     }
 
@@ -106,6 +144,106 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    // arm.setDefaultCommand(
+    //     Commands.either(
+    //             arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE),
+    //             arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
+    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+    //         .unless(() -> Robot.isArmManualControl()));
+
+    // intake.setDefaultCommand(
+    //     Commands.either(
+    //             intake.setTargetSpeedCommand(0),
+    //             intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
+    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+    //         .andThen(new TellCommand("Default command")));
+
+    intake.setDefaultCommand(intake.setTargetSpeedCommand(0));
+
+    // if the canrange doesn't see anything set rollers to intake speed
+    // Command intakeCommand =
+    //     new InstantCommand(() -> Robot.setArmManualControl(false))
+    //         .andThen(
+    //             new ConditionalCommand(
+    //                     intake.setTargetSpeedCommand(Constants.INTAKE_SPEED),
+    //                     // if the canrange does see something(we have coral) set rollers to
+    // holding
+    //                     // speed and vibrate controller to let the driver no
+    //                     intake
+    //                         .setTargetSpeedCommand(Constants.HOLDING_SPEED)
+    //                         .alongWith(
+    //                             new WaitCommand(0.2)
+    //                                 .andThen(new ControllerVibrateCommand(0.2, controller))),
+    //                     // conditional for the earlier statement
+    //                     () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
+    //                 .alongWith(
+    //                     // sets the arm angle to the intake angle
+    //                     arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
+
+    Command intakeCommand =
+        // set the arm height to the floor
+        new InstantCommand(() -> Robot.setArmManualControl(true))
+            .andThen(
+                arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
+                    .alongWith(
+                        // intakes
+                        intake.setTargetSpeedCommand(Constants.INTAKE_SPEED)));
+    // whe[]\n it notices a coral inside it vibrates the controller
+    // .until(
+    //     () ->
+    //         canrange.getCanDistance()
+    //             < Constants.CANRANGE_DETECTION_DISTANCE)
+    // .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
+    // .andThen(
+    //     new ControllerVibrateCommand(Constants.CONTROLLER_FEEDBACK_AMOUNT, controller))))
+    ;
+
+    Command scoringCommand =
+        new InstantCommand(() -> Robot.setArmManualControl(true))
+            .andThen(
+                arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
+                    .andThen(intake.setTargetSpeedCommand(Constants.EJECT_SPEED))
+                    .alongWith(
+                        new WaitCommand(Constants.CORAL_RELEASE_TIME)
+                            .andThen(new ControllerVibrateCommand(0.2, controller))));
+
+    controller.leftTrigger().whileTrue(intakeCommand);
+
+    controller.rightTrigger().whileTrue(scoringCommand);
+
+    controller
+        .rightBumper()
+        .whileTrue(
+            new InstantCommand(() -> Robot.setArmManualControl(true))
+                .andThen(arm.setTargetHeightCommand(Constants.ARM_MIN_ANGLE)));
+
+    controller.start().onTrue(arm.resetEncodersCommand().ignoringDisable(true));
+
+    // controller
+    //     .leftBumper()
+    //     .whileTrue(
+    //         new InstantCommand(() -> Robot.setArmManualControl(true))
+    //             .andThen(arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE)));
+
+    controller.povLeft().whileTrue(intake.setTargetSpeedCommand(Constants.EJECT_SPEED));
+    controller.povRight().whileTrue(intake.setTargetSpeedCommand(Constants.INTAKE_SPEED));
+    // controller.povUp().whileTrue(intake.setTargetSpeedCommand(Constants.HOLDING_SPEED));
+
+    // manual controls
+    // controller
+    //     .povDown()
+    //     .onTrue(
+    //         new InstantCommand(() -> Robot.setArmManualControl(!Robot.isArmManualControl()))
+    //             .andThen(
+    //                 new ControllerVibrateCommand(0.4, controller)
+    //                     .withDeadline(new WaitCommand(0.7))
+    //                     .unless(() -> !Robot.isArmManualControl())));
+
+    SmartDashboard.putData(
+        "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
+    SmartDashboard.putData(
+        "set canrange vision 5", (Sendable) this.canrange.setCanrangeDistanceCommand(5));
   }
 
   /**
@@ -155,5 +293,17 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public Arm getArm() {
+    return arm;
+  }
+
+  public Intake getIntake() {
+    return intake;
+  }
+
+  public RangeFinder getCanrange() {
+    return canrange;
   }
 }
