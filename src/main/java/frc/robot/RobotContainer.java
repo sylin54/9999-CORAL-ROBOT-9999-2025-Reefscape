@@ -86,11 +86,11 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        arm = new Arm(new ArmIOTalonFX(12, "rio"));
+        arm = new Arm(new ArmSimulationIO());
         // arm = new Arm(new ArmIO() {});
 
         canrange = new RangeFinder(new RangeFinderIO() {});
-        intake = new Intake(new IntakeIOTalonFX(11, "rio"), canrange);
+        intake = new Intake(new IntakeIOSimulation(), canrange);
 
         detector = new Detector(new DetectionIOLimelight("limelight", drive, 0));
 
