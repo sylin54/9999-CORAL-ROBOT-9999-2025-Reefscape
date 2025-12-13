@@ -37,10 +37,13 @@ public class PathfindToObjectCommand extends Command {
   // PIDController
   private final PIDController translationController =
       new PIDController(
-          Constants.CDrivetrain.transKp, Constants.CDrivetrain.transKi, Constants.CDrivetrain.transKd);
+          Constants.CDrivetrain.transKp,
+          Constants.CDrivetrain.transKi,
+          Constants.CDrivetrain.transKd);
 
   private final PIDController thetaController =
-      new PIDController(Constants.CDrivetrain.rotKp, Constants.CDrivetrain.rotKi, Constants.CDrivetrain.rotKd);
+      new PIDController(
+          Constants.CDrivetrain.rotKp, Constants.CDrivetrain.rotKi, Constants.CDrivetrain.rotKd);
 
   private final double translationTolerance = Constants.CDrivetrain.translationTolerance;
   private final double rotationTolerance = Constants.CDrivetrain.rotationTolerance;
@@ -227,13 +230,16 @@ public class PathfindToObjectCommand extends Command {
 
     // restrict velocity to within top speeds, implemented bc trapezoidal profile didn't work
     xVelocity =
-        MathUtil.clamp(xVelocity, -Constants.CDrivetrain.transTopSpeed, Constants.CDrivetrain.transTopSpeed);
+        MathUtil.clamp(
+            xVelocity, -Constants.CDrivetrain.transTopSpeed, Constants.CDrivetrain.transTopSpeed);
 
     yVelocity =
-        MathUtil.clamp(yVelocity, -Constants.CDrivetrain.transTopSpeed, Constants.CDrivetrain.transTopSpeed);
+        MathUtil.clamp(
+            yVelocity, -Constants.CDrivetrain.transTopSpeed, Constants.CDrivetrain.transTopSpeed);
 
     thetaVelocity =
-        MathUtil.clamp(thetaVelocity, -Constants.CDrivetrain.rotTopSpeed, Constants.CDrivetrain.rotTopSpeed);
+        MathUtil.clamp(
+            thetaVelocity, -Constants.CDrivetrain.rotTopSpeed, Constants.CDrivetrain.rotTopSpeed);
 
     return new ChassisSpeeds(xVelocity, yVelocity, thetaVelocity);
   }

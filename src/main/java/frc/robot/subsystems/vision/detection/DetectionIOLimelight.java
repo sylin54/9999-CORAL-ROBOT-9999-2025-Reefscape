@@ -224,7 +224,7 @@ public class DetectionIOLimelight implements DetectionIO {
   }
 
   // helper methods
-  /** tx: horizantonal offset of object from camera ty: vertical offset */
+  /** tx: horizantonal offset in degrees (CW+) of object from camera ty: vertical offset (CW+) */
 
   // LIFTED DIRECTLY FROM CITRUS
   // we aim at the lower end of the object. This works for coral but maybe not for algae. Test and
@@ -243,13 +243,12 @@ public class DetectionIOLimelight implements DetectionIO {
     Distance distAwayY =
         // the hieght of the camera
         cameraOffset
-            .getMeasureZ()
-            // aims at the lower end of the coral
-            .minus(algaeRad)
-            .div(Math.tan(totalAngleY)); // robot x
+            .getMeasureZ() // get camera height
+            .minus(algaeRad) // find camera-to-algae-middle height
+            .times(Math.tan(totalAngleY)); // outputs "X" robot-relative coordinate
     // System.out.println("dist away y" + distAwayY);
 
-    // distance of camera to ground on y axis I believe it
+    // hypotenuse of triangle formed by height of robot to center of algae and the x distance 
     Distance distHypotenuseYToGround =
         BaseUnits.DistanceUnit.of(
             Math.hypot(
@@ -259,7 +258,7 @@ public class DetectionIOLimelight implements DetectionIO {
     // System.out.println("dist hypo to ground: " + distHypotenuseYToGround);
 
     // same thing as before
-    double totalAngleX = Units.degreesToRadians(-tx) + cameraOffset.getZ();
+    double totalAngleX = Units.degreesToRadians(-tx) + cameraOffset.getRotation().getZ();
 
     // System.out.println("total angle x: " + totalAngleX);
 
