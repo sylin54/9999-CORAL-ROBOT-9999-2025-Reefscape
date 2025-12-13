@@ -5,11 +5,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-public class Decector extends SubsystemBase {
+public class Detector extends SubsystemBase {
   private DetectionIO detectionIO;
   private DetectionIOInputsAutoLogged inputs = new DetectionIOInputsAutoLogged();
 
-  public Decector(DetectionIO detectionIO) {
+  public Detector(DetectionIO detectionIO) {
     this.detectionIO = detectionIO;
   }
 

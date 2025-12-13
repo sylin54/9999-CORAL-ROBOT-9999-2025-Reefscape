@@ -46,6 +46,11 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSimulation;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import frc.robot.subsystems.vision.detection.DetectionIO;
+import frc.robot.subsystems.vision.detection.DetectionIOLimelight;
+import frc.robot.subsystems.vision.detection.DetectionIOSimulation;
+import frc.robot.subsystems.vision.detection.Detector;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -67,6 +72,7 @@ public class RobotContainer {
   public final Arm arm;
   public final RangeFinder canrange;
   public final Intake intake;
+  public final Detector detector;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -86,6 +92,8 @@ public class RobotContainer {
         canrange = new RangeFinder(new RangeFinderIO() {});
         intake = new Intake(new IntakeIOTalonFX(11, "rio"), canrange);
 
+        detector = new Detector(new DetectionIOLimelight("limelight", drive, 0));
+
         break;
 
       case SIM:
@@ -103,6 +111,9 @@ public class RobotContainer {
         canrange = new RangeFinder(new RangeFinderSimulationIO());
         intake = new Intake(new IntakeIOSimulation(), canrange);
 
+        detector = new Detector(new DetectionIOSimulation(drive));
+
+
         break;
 
       default:
@@ -119,6 +130,8 @@ public class RobotContainer {
 
         canrange = new RangeFinder(new RangeFinderIO() {});
         intake = new Intake(new IntakeIO() {}, canrange);
+
+        detector = new Detector(new DetectionIO() {});
 
         break;
     }

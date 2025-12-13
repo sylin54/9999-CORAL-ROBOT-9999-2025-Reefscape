@@ -121,5 +121,30 @@ public final class Constants {
 
     public static double TOLERANCE_DIST = 0.1;
     public static double TOLERANCE_ROT = 0.1;
+
+    // PID constants for frc.robot.commands.driveCommands.PathfindToPoseCommand
+
+    // translational const
+    public static final double transKp = 2;
+    public static final double transKi = 0;
+    public static final double transKd = 0;
+
+    public static final double transTopSpeed = 1.5;
+    public static final double transAccMax = 2;
+
+    // rot const
+    public static final double rotKp = 1.7;
+    public static final double rotKi = 0;
+    public static final double rotKd = 0;
+
+    public static final double rotTopSpeed = 100;
+    public static final double rotAccMax = 110;
+
+    // tolerances
+    public static final double rotationTolerance = 0.1;
+    public static final double translationTolerance = 0.1;
+
+    public static final double totalDistTol = 2.3;
+    public static final double totalRotTol = .2;
   }
 }
