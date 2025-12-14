@@ -206,6 +206,7 @@ public class PathfindToObjectCommand extends Command {
     // calculate distances
     translationDistanceX = targetPose.getX() - currentPose.getX();
     translationDistanceY = targetPose.getY() - currentPose.getY();
+    // NOTE: since the camera is rotated 90 degrees, we can't do much with this yet
     thetaDistance = targetPose.getRotation().minus(currentPose.getRotation()).getRadians();
 
     int allianceMultiplier = !isFlipped ? 1 : -1;
@@ -237,6 +238,7 @@ public class PathfindToObjectCommand extends Command {
         MathUtil.clamp(
             yVelocity, -Constants.CDrivetrain.transTopSpeed, Constants.CDrivetrain.transTopSpeed);
 
+    // NOTE: since our camera is rotated 90 degrees, thetavelocity doesn't work as intended yet
     thetaVelocity =
         MathUtil.clamp(
             thetaVelocity, -Constants.CDrivetrain.rotTopSpeed, Constants.CDrivetrain.rotTopSpeed);

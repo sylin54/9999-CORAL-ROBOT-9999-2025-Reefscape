@@ -245,10 +245,10 @@ public class DetectionIOLimelight implements DetectionIO {
         cameraOffset
             .getMeasureZ() // get camera height
             .minus(algaeRad) // find camera-to-algae-middle height
-            .times(Math.tan(totalAngleY)); // outputs "X" robot-relative coordinate
+            .div(Math.tan(totalAngleY)); // outputs "X" robot-relative coordinate
     // System.out.println("dist away y" + distAwayY);
 
-    // hypotenuse of triangle formed by height of robot to center of algae and the x distance 
+    // hypotenuse of triangle formed by height of robot to center of algae and the x distance
     Distance distHypotenuseYToGround =
         BaseUnits.DistanceUnit.of(
             Math.hypot(
@@ -262,7 +262,8 @@ public class DetectionIOLimelight implements DetectionIO {
 
     // System.out.println("total angle x: " + totalAngleX);
 
-    Distance distAwayX = distHypotenuseYToGround.times(Math.tan(totalAngleX)); // robot y
+    Distance distAwayX =
+        distAwayY.times(Math.tan(totalAngleX)); // outputs "Y" robot-relative coordinate
 
     // System.out.println("dist away x: " + distAwayX);
 
@@ -275,6 +276,8 @@ public class DetectionIOLimelight implements DetectionIO {
     SmartDashboard.putNumber(
         name + "/Distance Away Hyp ", distHypotenuseYToGround.in(edu.wpi.first.units.Units.Meters));
 
-    return new Translation2d(distAwayY, distAwayX);
+    // return new Translation2d(distAwayY, distAwayX);
+    return new Translation2d(
+        distAwayX, distAwayY.times(-1)); // we rotated the entire thing by 90deg clockwise
   }
 }

@@ -129,8 +129,8 @@ public final class Constants {
     public static final double transKi = 0;
     public static final double transKd = 0;
 
-    public static final double transTopSpeed = 1.5;
-    public static final double transAccMax = 2;
+    public static final double transTopSpeed = 0.5;
+    public static final double transAccMax = 0.75;
 
     // rot const
     public static final double rotKp = 1.7;
@@ -144,7 +144,7 @@ public final class Constants {
     public static final double rotationTolerance = 0.1;
     public static final double translationTolerance = 0.1;
 
-    public static final double totalDistTol = 2.3;
+    public static final double totalDistTol = 1;
     public static final double totalRotTol = .2;
   }
 }

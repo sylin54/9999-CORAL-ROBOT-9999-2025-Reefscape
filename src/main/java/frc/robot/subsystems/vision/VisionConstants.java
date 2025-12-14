@@ -51,7 +51,7 @@ public class VisionConstants {
   // object detection
   // PLACEHOLDER VALUE
   public static final Transform3d ROBOT_TO_ARDUCAM_DETECTION =
-      new Transform3d(0.0381, -0.0127, 0.4318, new Rotation3d(0.0610865, -0.453786, -Math.PI / 2));
+      new Transform3d(0.0381, 0.0127, 0.4318, new Rotation3d(0.0610865, -0.453786, 0));
 
   // PLACEHOLDER VALUE
   public static final Distance ALGAE_RADIUS = Units.Inches.of(16.25 / 2);
