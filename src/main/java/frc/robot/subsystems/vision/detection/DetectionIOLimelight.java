@@ -43,6 +43,7 @@ public class DetectionIOLimelight implements DetectionIO {
     this.objectID = objectID;
 
     fieldObjects = new ArrayList<>();
+    
   }
 
   @Override
