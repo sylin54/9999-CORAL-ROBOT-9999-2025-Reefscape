@@ -18,7 +18,6 @@ public class Detection {
         this(detectionTimeSec, new Pose2d(position, new Rotation2d()));
     }
 
-    //getters
     /**
      * 
      * @return the timestamp when this detection (system clock in seconds, Timer.getFPGATTimestamp)

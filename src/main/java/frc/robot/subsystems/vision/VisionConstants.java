@@ -48,14 +48,6 @@ public class VisionConstants {
           // new original Y is -0.2002028
           new Transform3d(0.2794, -0.24, 0.739902, new Rotation3d(0.0, 0.174533, 0.349066));
 
-  // object detection
-  // PLACEHOLDER VALUE
-  public static final Transform3d ROBOT_TO_ARDUCAM_DETECTION =
-      new Transform3d(0, 0, 0, new Rotation3d(0.0, 0, 0));
-
-  // PLACEHOLDER VALUE
-  public static final Distance ALGAE_RADIUS = Units.Inches.of(4.5 / 2);
-
   public static final double objTimeoutTimeSec = 0.2;
   public static final int maxObjAmount = 20;
 
@@ -81,4 +73,20 @@ public class VisionConstants {
   public static final double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
   public static final double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
+
+
+// OBJECT DETECTION
+  // PLACEHOLDER VALUE
+  public static final Transform3d ROBOT_TO_ARDUCAM_DETECTION =
+  new Transform3d(0, 0, 0, new Rotation3d(0.0, 0, 0));
+
+// PLACEHOLDER VALUE
+public static final Distance ALGAE_RADIUS = Units.Inches.of(4.5 / 2);
+
+//the minimum detectoins attributed ot an object to consider an object in our pathfinding
+public static int MIN_DETECTIONS_TO_CONSIDER_OBJECT = 4;
+
+//the proportion when considering of a detection is part of an already detected object
+public static final double kValCorellation = 2;
+
 }
