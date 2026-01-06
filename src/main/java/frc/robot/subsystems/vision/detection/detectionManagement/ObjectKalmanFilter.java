@@ -79,7 +79,7 @@ public class ObjectKalmanFilter {
     }
 
     /**
-     * proccess updates + predicts new values. SHOULD BE CALLED PERIODICALLY
+     * process updates + predicts new values. MUST BE CALLED PERIODICALLY
      */
     public void periodic() {
         xObserver.predict(VecBuilder.fill(0), dtSeconds);

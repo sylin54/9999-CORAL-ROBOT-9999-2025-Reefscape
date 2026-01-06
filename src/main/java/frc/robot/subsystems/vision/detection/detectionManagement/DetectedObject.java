@@ -28,6 +28,13 @@ public class DetectedObject {
     }
 
     /**
+     * updates kalman filter. MUST BE CALLED PERIODICALLY
+     */
+    public void periodic() {
+        objectKalmanFilter.periodic();
+    }
+
+    /**
      * adds a detection to the detected object using a kalman filter
      * @param detection
      */

@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.vision.VisionConstants;
 
 public class DetectionManager {
     //this is a list which is bad for performance since we are looping through it multiple times a tick. I believe this is ok?? we should change hte data structe if we notice problems
@@ -12,21 +13,23 @@ public class DetectionManager {
     public List<DetectedObject> objects;
 
     //dummy values for now i'm not really sure how this is gonna pan out later
-    private double correlationThreshold = 0.8;
-    private double confidenceThreshold = 0.8;
-    private double removalTimeSec = 0.2;
+    private double correlationThreshold = VisionConstants.OBJ_CORELLATION_THRESHOLD;
+    private double confidenceThreshold = VisionConstants.OBJ_CONFIDENCETHRESHOLD;
+    private double removalTimeSec = VisionConstants.OBJ_REMOVAL_TIME;
 
     public DetectionManager() {
         objects = new ArrayList<>();
-
-        
     }
 
     /**
-     * should be called about every tick
+     * must be called about every tick
      */
-    public void update() {
+    public void periodic() {
         checkDetections();
+
+        for(DetectedObject object : objects) {
+            object.periodic();
+        }
     }
 
     /**

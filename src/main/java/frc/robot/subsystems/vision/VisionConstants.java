@@ -89,4 +89,8 @@ public static int MIN_DETECTIONS_TO_CONSIDER_OBJECT = 4;
 //the proportion when considering of a detection is part of an already detected object
 public static final double kValCorellation = 2;
 
+public static final double OBJ_CORELLATION_THRESHOLD = 0.8;
+public static final double OBJ_CONFIDENCETHRESHOLD = 0.8;
+public static final double OBJ_REMOVAL_TIME = 0.5;
+
 }
