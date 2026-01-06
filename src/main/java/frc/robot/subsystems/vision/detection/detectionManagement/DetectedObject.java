@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision.detection.detectionManagement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -11,8 +12,13 @@ public class DetectedObject {
 
     private double lastDetectionTimestamp = 0;
 
+    //implement this later
+    private UUID id;
+
     public DetectedObject(Detection detection) {
         addDetection(detection);
+
+        id = UUID.randomUUID();
     }
 
     /**
@@ -67,5 +73,21 @@ public class DetectedObject {
      */
     public double getDistance(Pose2d pose) {
         return getEstimatedPosition().getTranslation().getDistance(pose.getTranslation());
+    }
+
+    /**
+     * 
+     * @return the pose of the detection
+     */
+    public Pose2d getPose() {
+        return new Pose2d();
+    }
+
+    /**
+     * 
+     * @return the unique id of the detection
+     */
+    public UUID getID() {
+        return id;
     }
 }
