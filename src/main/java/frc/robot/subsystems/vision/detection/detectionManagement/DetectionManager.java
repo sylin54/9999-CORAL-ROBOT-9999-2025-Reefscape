@@ -3,6 +3,8 @@ package frc.robot.subsystems.vision.detection.detectionManagement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.vision.VisionConstants;
@@ -17,6 +19,8 @@ public class DetectionManager {
     private double confidenceThreshold = VisionConstants.OBJ_CONFIDENCETHRESHOLD;
     private double removalTimeSec = VisionConstants.OBJ_REMOVAL_TIME;
 
+    public final String LOGGING_TITLE = "detections";
+
     public DetectionManager() {
         objects = new ArrayList<>();
     }
@@ -30,6 +34,8 @@ public class DetectionManager {
         for(DetectedObject object : objects) {
             object.periodic();
         }
+
+        log();
     }
 
     /**
@@ -103,6 +109,26 @@ public class DetectionManager {
         }
         
         return false;
+    }
+
+    /**
+     * helper method that logs all of the outputs
+     */
+    private void log() {
+        List<Pose2d> totalDetections = new ArrayList<>();
+
+        for(int i = 0; i < objects.size(); i++) {
+            String title = LOGGING_TITLE + "/Detection" + i;
+
+            DetectedObject detectedObject = objects.get(i);
+            
+            detectedObject.log(title);
+
+            totalDetections.addAll(detectedObject.getDetectionsPose());
+        }
+
+        Logger.recordOutput(LOGGING_TITLE + "/TotalDetections",(Pose2d[]) totalDetections.toArray());
+        Logger.recordOutput(LOGGING_TITLE + "/DetectionAmount", totalDetections.size());
     }
 
     /**
