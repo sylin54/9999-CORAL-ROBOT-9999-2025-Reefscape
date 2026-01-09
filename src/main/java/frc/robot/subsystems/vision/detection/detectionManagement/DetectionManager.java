@@ -12,7 +12,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 public class DetectionManager {
     //this is a list which is bad for performance since we are looping through it multiple times a tick. I believe this is ok?? we should change hte data structe if we notice problems
     //maybe need to add cleanup to put objects close to each other so we don't run into two different objects?? I'm not sure
-    public List<DetectedObject> objects;
+    private List<DetectedObject> objects;
 
     //dummy values for now i'm not really sure how this is gonna pan out later
     private double correlationThreshold = VisionConstants.OBJ_CORELLATION_THRESHOLD;
@@ -29,7 +29,7 @@ public class DetectionManager {
      * must be called about every tick
      */
     public void periodic() {
-        checkDetections();
+        removeOldDetections();
 
         for(DetectedObject object : objects) {
             object.periodic();
@@ -99,6 +99,18 @@ public class DetectionManager {
         return objects.get(bestIndex).getEstimatedPosition();
     }
 
+    public boolean isDetected() {
+
+
+        for(int i = 0; i < objects.size(); i++) {
+            DetectedObject curObject = objects.get(i);
+
+            if(curObject.getConfidence() > confidenceThreshold) return true;
+        }
+
+        return false;
+    }
+
     /**
      * 
      * @return if there any detections that match the confidence threshold
@@ -134,7 +146,7 @@ public class DetectionManager {
     /**
      * remove any detections that haven't been updated soon enough
      */
-    private void checkDetections() {
+    private void removeOldDetections() {
         List<DetectedObject> updatedObjects = new ArrayList<>();
         
         for(DetectedObject object : objects) {
