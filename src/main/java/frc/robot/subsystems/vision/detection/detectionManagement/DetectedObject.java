@@ -1,6 +1,10 @@
 package frc.robot.subsystems.vision.detection.detectionManagement;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,9 +15,6 @@ import frc.robot.subsystems.vision.VisionConstants;
 
 public class DetectedObject {
 
-    //counter for the amount of detections this object has had. That way if it hasn't had that much yet we can just ignore it
-    private double detectionAmount = 0;
-
     private double lastDetectionTimestamp = 0;
 
     private UUID id;
@@ -21,10 +22,15 @@ public class DetectedObject {
     //tweak values later
     private ObjectKalmanFilter objectKalmanFilter = new ObjectKalmanFilter();
 
+    //list of detections for logging purposes
+    private List<Detection> detections;
+
     public DetectedObject(Detection detection) {
         addDetection(detection);
 
         id = UUID.randomUUID();
+
+        detections = new ArrayList<>();
     }
 
     /**
@@ -44,9 +50,9 @@ public class DetectedObject {
             lastDetectionTimestamp = detection.getDetectionTimeSec();
         }
 
-        detectionAmount++;
-
         objectKalmanFilter.addMeasurement(detection.getPosition().getTranslation());
+
+        detections.add(detection);
 
     }
 
@@ -65,11 +71,19 @@ public class DetectedObject {
     public double getConfidence() {
         //here add logic to give it zero confidence if there aren't enough detections OR if the last detection was to long ago
 
-        if(detectionAmount < VisionConstants.MIN_DETECTIONS_TO_CONSIDER_OBJECT) {
+        if(getDetectionAmount() < VisionConstants.MIN_DETECTIONS_TO_CONSIDER_OBJECT) {
             return 0;
         }
 
         return 1;
+    }
+
+    /**
+     * 
+     * @return the total amount of detections put into this object
+     */
+    public int getDetectionAmount() {
+        return detections.size();
     }
 
     /**
@@ -113,17 +127,36 @@ public class DetectedObject {
 
     /**
      * 
-     * @return the pose of the detection
-     */
-    public Pose2d getPose() {
-        return new Pose2d();
-    }
-
-    /**
-     * 
      * @return the unique id of the detection
      */
     public UUID getID() {
         return id;
+    }
+
+    /**
+     * @returns the position of all of the detections
+     */
+    public List<Pose2d> getDetectionsPose() {
+        List<Pose2d> detectionsPose = new ArrayList<>();
+
+        for(Detection detection : detections) {
+            detectionsPose.add(detection.getPosition());
+        }
+
+        return detectionsPose;
+    }
+    
+    /**
+     * logs all of the values onto advantage kti
+     * 
+     * @param title the title put before the logged values
+     */
+    public void log(String title) {
+        Logger.recordOutput(title + "/detectionAmount", getDetectionAmount());
+        Logger.recordOutput(title + "/lastDetectionTimestamp", getLastTimeUpdated());
+        Logger.recordOutput(title + "/id", getID().toString());
+        Logger.recordOutput(title + "/confidence", getConfidence());
+        Logger.recordOutput(title + "/estimatedPosition", getEstimatedPosition());
+        Logger.recordOutput(title + "/detections", (Pose2d[]) getDetectionsPose().toArray());
     }
 }

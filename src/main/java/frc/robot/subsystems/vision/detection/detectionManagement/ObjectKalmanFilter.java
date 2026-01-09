@@ -32,12 +32,12 @@ public class ObjectKalmanFilter {
     private double dtSeconds;
 
     //the modeling of the x/y axis of movement
-    private LinearSystem<N2, N1, N2> xBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
-    private LinearSystem<N2, N1, N2> yBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
+    private LinearSystem<N2, N1, N2> xBallPlant;
+    private LinearSystem<N2, N1, N2> yBallPlant;
 
     //filter for x/y
-    private KalmanFilter<N2, N1, N1> xObserver = new KalmanFilter(Nat.N2(), Nat.N1(), xBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
-    private KalmanFilter<N2, N1, N1> yObserver = new KalmanFilter(Nat.N2(), Nat.N1(), yBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
+    private KalmanFilter<N2, N1, N1> xObserver;
+    private KalmanFilter<N2, N1, N1> yObserver;
 
     //measurement manager variables
     private boolean hasNewMeasurement = false;
@@ -67,6 +67,12 @@ public class ObjectKalmanFilter {
 
         this.dtSeconds = dtSeconds;
 
+        xBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
+        yBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
+
+        xObserver = new KalmanFilter(Nat.N2(), Nat.N1(), xBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
+        yObserver = new KalmanFilter(Nat.N2(), Nat.N1(), yBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
+
     }
 
     /**
@@ -89,7 +95,7 @@ public class ObjectKalmanFilter {
         //procccess any new measurement. Vector fill 0 because this doesn't account for speed
         if(hasNewMeasurement) {
             xObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getX()));
-            xObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getY()));
+            yObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getY()));
 
             hasNewMeasurement = false;
         }
@@ -110,7 +116,7 @@ public class ObjectKalmanFilter {
      * @return the estimated speed of the object
      */
     public Translation2d getFilteredSpeed() {
-        Translation2d output = new Translation2d(xObserver.getXhat(1), xObserver.getXhat(0));
+        Translation2d output = new Translation2d(xObserver.getXhat(1), yObserver.getXhat(1));
 
         return output;
     }
