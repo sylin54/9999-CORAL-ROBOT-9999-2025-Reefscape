@@ -42,6 +42,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSimulation;
+import frc.robot.subsystems.turret.TurretRotationManager;
 import frc.robot.subsystems.vision.detection.DetectionIO;
 import frc.robot.subsystems.vision.detection.DetectionIOLimelight;
 import frc.robot.subsystems.vision.detection.DetectionIOSimulation;
@@ -69,6 +70,8 @@ public class RobotContainer {
   public final Intake intake;
   public final Detector detector;
 
+  public final TurretRotationManager turretRotationManager;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -89,6 +92,10 @@ public class RobotContainer {
 
         detector = new Detector(new DetectionIOLimelight("limelight", drive, 0));
 
+        turretRotationManager =
+            new TurretRotationManager(
+                () -> new Pose2d(0, 0, new Rotation2d()), () -> drive.getPose());
+
         break;
 
       case SIM:
@@ -108,6 +115,10 @@ public class RobotContainer {
 
         detector = new Detector(new DetectionIOSimulation(drive));
 
+        turretRotationManager =
+            new TurretRotationManager(
+                () -> new Pose2d(0, 0, new Rotation2d()), () -> drive.getPose());
+
         break;
 
       default:
@@ -126,6 +137,10 @@ public class RobotContainer {
         intake = new Intake(new IntakeIO() {}, canrange);
 
         detector = new Detector(new DetectionIO() {});
+
+        turretRotationManager =
+            new TurretRotationManager(
+                () -> new Pose2d(0, 0, new Rotation2d()), () -> drive.getPose());
 
         break;
     }
@@ -267,12 +282,24 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
-    drive.setDefaultCommand(
+
+    Command defaultDrive =
         DriveCommands.joystickDrive(
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -controller.getRightX());
+
+    Command targetedDrive =
+        DriveCommands.joystickDriveAtAngle(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> turretRotationManager.getHeading());
+
+    drive.setDefaultCommand(defaultDrive);
+
+    controller.rightTrigger().whileTrue(targetedDrive);
 
     // Lock to 0° when A button is held
     controller
