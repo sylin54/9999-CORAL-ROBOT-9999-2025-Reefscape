@@ -45,7 +45,7 @@ public class ObjectKalmanFilter {
 
   /** default instantiation SHOULD ONLY BE USED FOR TESTING */
   public ObjectKalmanFilter() {
-    this(0.8, 0.2, VecBuilder.fill(1.0, 2.0), VecBuilder.fill(1.0), 0.02);
+    this(0.8, 0.2, VecBuilder.fill(1.0, 2.0), VecBuilder.fill(1.0, 1.000), 0.02);
   }
 
   /**
@@ -56,7 +56,11 @@ public class ObjectKalmanFilter {
    * @param dtSeconds period of processing
    */
   public ObjectKalmanFilter(
-      double kV, double kA, Matrix stateStdDevs, Matrix measurementStdDevs, double dtSeconds) {
+      double kV,
+      double kA,
+      Matrix<N2, N1> stateStdDevs,
+      Matrix<N2, N1> measurementStdDevs,
+      double dtSeconds) {
     this.kV = kV;
     this.kA = kA;
 
