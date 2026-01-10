@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Decector extends SubsystemBase {
+public class Detector extends SubsystemBase {
   private DetectionIO detectionIO;
   private DetectionIOInputsAutoLogged inputs = new DetectionIOInputsAutoLogged();
 
@@ -18,7 +18,7 @@ public class Decector extends SubsystemBase {
 
   private Supplier<Pose2d> poseSupplier;
 
-  public Decector(DetectionIO detectionIO, Supplier<Pose2d> poseSupplier) {
+  public Detector(DetectionIO detectionIO, Supplier<Pose2d> poseSupplier) {
     this.detectionIO = detectionIO;
 
     this.poseSupplier = poseSupplier;

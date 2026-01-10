@@ -28,6 +28,8 @@ public class DetectionIOLimelight implements DetectionIO {
     this.name = name;
 
     this.robotPoseSupplier = robotPoseSupplier;
+
+    detections = new ArrayList<>();
   }
 
   /** updates the vision systems. THis should be called in the periodic function of the subsystem */

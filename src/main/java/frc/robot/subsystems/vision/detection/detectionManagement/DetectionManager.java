@@ -135,7 +135,13 @@ public class DetectionManager {
       totalDetections.addAll(detectedObject.getDetectionsPose());
     }
 
-    Logger.recordOutput(LOGGING_TITLE + "/TotalDetections", (Pose2d[]) totalDetections.toArray());
+    Pose2d[] pose2ds = new Pose2d[totalDetections.size()];
+
+    for (int i = 0; i < pose2ds.length; i++) {
+      pose2ds[i] = totalDetections.get(i);
+    }
+
+    Logger.recordOutput(LOGGING_TITLE + "/TotalDetections", pose2ds);
     Logger.recordOutput(LOGGING_TITLE + "/DetectionAmount", totalDetections.size());
   }
 
