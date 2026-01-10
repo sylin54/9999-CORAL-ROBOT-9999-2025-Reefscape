@@ -1,12 +1,6 @@
 package frc.robot.subsystems.vision.detection;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -18,108 +12,111 @@ import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.subsystems.vision.LimelightHelpers.RawDetection;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.detection.detectionManagement.Detection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
-public class DetectionIOLimelight implements DetectionIO{
-    
-    private String name;
+public class DetectionIOLimelight implements DetectionIO {
 
-    private Supplier<Pose2d> robotPoseSupplier;
+  private String name;
 
-    private List<Detection> detections;
+  private Supplier<Pose2d> robotPoseSupplier;
 
-    public DetectionIOLimelight(String name, Supplier<Pose2d> robotPoseSupplier) {
-        this.name = name;
+  private List<Detection> detections;
 
-        this.robotPoseSupplier = robotPoseSupplier;
+  public DetectionIOLimelight(String name, Supplier<Pose2d> robotPoseSupplier) {
+    this.name = name;
+
+    this.robotPoseSupplier = robotPoseSupplier;
+  }
+
+  /** updates the vision systems. THis should be called in the periodic function of the subsystem */
+  public void update() {
+
+    RawDetection[] rawDetections = LimelightHelpers.getRawDetections(name);
+
+    double curTimeStamp = Timer.getFPGATimestamp();
+
+    for (int i = 0; i < rawDetections.length; i++) {
+      RawDetection rawDetection = rawDetections[i];
+
+      int id = rawDetection.classId;
+
+      Translation2d offset = calcDistToObject(rawDetection.txnc, rawDetection.tync);
+
+      Detection detection =
+          new Detection(curTimeStamp, robotPoseSupplier.get().getTranslation().plus(offset), id);
+
+      detections.add(detection);
     }
+  }
 
+  /**
+   * Should be cleared after obtaining
+   *
+   * @return a list of detections since it was cleared
+   */
+  public List<Detection> getDetections() {
 
-    /** updates the vision systems. THis should be called in the periodic function of the subsystem */
-    public void update() {
-        
-        RawDetection[] rawDetections = LimelightHelpers.getRawDetections(name);
-    
-        double curTimeStamp = Timer.getFPGATimestamp();
+    // creates a new list so we don't tamper with the old one
+    List<Detection> returnVal = new ArrayList<>();
+    returnVal.addAll(detections);
 
-        for(int i = 0; i < rawDetections.length; i++) {
-            RawDetection rawDetection = rawDetections[i];
+    return returnVal;
+  }
 
-            Translation2d offset = calcDistToObject(rawDetection.txnc, rawDetection.tync);
+  /** clears the list of new detections */
+  public void clearDetections() {
+    detections = new ArrayList<>();
+  }
 
-            Detection detection = new Detection(curTimeStamp, robotPoseSupplier.get().getTranslation().plus(offset));
-            
-            detections.add(detection);
-        }
-    }
+  private Translation2d calcDistToObject(double tx, double ty) {
 
-    /**
-     * Should be cleared after obtaining
-     * @return a list of detections since it was cleared
-     */
-    public List<Detection> getDetections() {
+    Transform3d cameraOffset = VisionConstants.ROBOT_TO_ARDUCAM_DETECTION;
+    Distance algaeRad = VisionConstants.ALGAE_RADIUS;
 
-        //creates a new list so we don't tamper with the old one
-        List<Detection> returnVal = new ArrayList<>();
-        returnVal.addAll(detections);
+    // verticlal angle
+    double totalAngleY = Units.degreesToRadians(-ty) - cameraOffset.getRotation().getY();
 
-        return returnVal;
-    }
+    // System.out.println("total angle: " + totalAngleY);
 
-    /**
-     * clears the list of new detections
-     */
-    public void clearDetections() {
-        detections = new ArrayList<>();
-    }
+    // all this is doing is : horizantol = z/tan(angle)
+    Distance distAwayY =
+        // the hieght of the camera
+        cameraOffset
+            .getMeasureZ()
+            // aims at the lower end of the coral
+            .minus(algaeRad)
+            .div(Math.tan(totalAngleY)); // robot x
+    // System.out.println("dist away y" + distAwayY);
 
-    private Translation2d calcDistToObject(double tx, double ty) {
+    // distance of camera to ground on y axis I believe it
+    Distance distHypotenuseYToGround =
+        BaseUnits.DistanceUnit.of(
+            Math.hypot(
+                distAwayY.in(BaseUnits.DistanceUnit),
+                cameraOffset.getMeasureZ().minus(algaeRad).in(BaseUnits.DistanceUnit)));
 
-        Transform3d cameraOffset = VisionConstants.ROBOT_TO_ARDUCAM_DETECTION;
-        Distance algaeRad = VisionConstants.ALGAE_RADIUS;
+    // System.out.println("dist hypo to ground: " + distHypotenuseYToGround);
 
-        // verticlal angle
-        double totalAngleY = Units.degreesToRadians(-ty) - cameraOffset.getRotation().getY();
+    // same thing as before
+    double totalAngleX = Units.degreesToRadians(-tx) + cameraOffset.getZ();
 
-        // System.out.println("total angle: " + totalAngleY);
+    // System.out.println("total angle x: " + totalAngleX);
 
-        // all this is doing is : horizantol = z/tan(angle)
-        Distance distAwayY =
-            // the hieght of the camera
-            cameraOffset
-                .getMeasureZ()
-                // aims at the lower end of the coral
-                .minus(algaeRad)
-                .div(Math.tan(totalAngleY)); // robot x
-        // System.out.println("dist away y" + distAwayY);
+    Distance distAwayX = distHypotenuseYToGround.times(Math.tan(totalAngleX)); // robot y
 
-        // distance of camera to ground on y axis I believe it
-        Distance distHypotenuseYToGround =
-            BaseUnits.DistanceUnit.of(
-                Math.hypot(
-                    distAwayY.in(BaseUnits.DistanceUnit),
-                    cameraOffset.getMeasureZ().minus(algaeRad).in(BaseUnits.DistanceUnit)));
+    // System.out.println("dist away x: " + distAwayX);
 
-        // System.out.println("dist hypo to ground: " + distHypotenuseYToGround);
+    SmartDashboard.putNumber(name + "/tx", tx);
+    SmartDashboard.putNumber(name + "/ty", ty);
+    SmartDashboard.putNumber(
+        name + "/Distance Away Y", distAwayY.in(edu.wpi.first.units.Units.Meters));
+    SmartDashboard.putNumber(
+        name + "/Distance Away X", distAwayX.in(edu.wpi.first.units.Units.Meters));
+    SmartDashboard.putNumber(
+        name + "/Distance Away Hyp ", distHypotenuseYToGround.in(edu.wpi.first.units.Units.Meters));
 
-        // same thing as before
-        double totalAngleX = Units.degreesToRadians(-tx) + cameraOffset.getZ();
-
-        // System.out.println("total angle x: " + totalAngleX);
-
-        Distance distAwayX = distHypotenuseYToGround.times(Math.tan(totalAngleX)); // robot y
-
-        // System.out.println("dist away x: " + distAwayX);
-
-        SmartDashboard.putNumber(name + "/tx", tx);
-        SmartDashboard.putNumber(name + "/ty", ty);
-        SmartDashboard.putNumber(
-            name + "/Distance Away Y", distAwayY.in(edu.wpi.first.units.Units.Meters));
-        SmartDashboard.putNumber(
-            name + "/Distance Away X", distAwayX.in(edu.wpi.first.units.Units.Meters));
-        SmartDashboard.putNumber(
-            name + "/Distance Away Hyp ", distHypotenuseYToGround.in(edu.wpi.first.units.Units.Meters));
-
-        return new Translation2d(distAwayY, distAwayX);
-    }
-    
+    return new Translation2d(distAwayY, distAwayX);
+  }
 }

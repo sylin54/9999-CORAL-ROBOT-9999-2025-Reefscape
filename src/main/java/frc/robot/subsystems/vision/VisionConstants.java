@@ -74,23 +74,21 @@ public class VisionConstants {
   public static final double angularStdDevMegatag2Factor =
       Double.POSITIVE_INFINITY; // No rotation data available
 
-
-// OBJECT DETECTION
+  // OBJECT DETECTION
   // PLACEHOLDER VALUE
   public static final Transform3d ROBOT_TO_ARDUCAM_DETECTION =
-  new Transform3d(0, 0, 0, new Rotation3d(0.0, 0, 0));
+      new Transform3d(0, 0, 0, new Rotation3d(0.0, 0, 0));
 
-// PLACEHOLDER VALUE
-public static final Distance ALGAE_RADIUS = Units.Inches.of(4.5 / 2);
+  // PLACEHOLDER VALUE
+  public static final Distance ALGAE_RADIUS = Units.Inches.of(4.5 / 2);
 
-//the minimum detectoins attributed ot an object to consider an object in our pathfinding
-public static int MIN_DETECTIONS_TO_CONSIDER_OBJECT = 4;
+  // the minimum detectoins attributed ot an object to consider an object in our pathfinding
+  public static int MIN_DETECTIONS_TO_CONSIDER_OBJECT = 4;
 
-//the proportion when considering of a detection is part of an already detected object
-public static final double kValCorellation = 2;
+  // the proportion when considering of a detection is part of an already detected object
+  public static final double kValCorellation = 2;
 
-public static final double OBJ_CORELLATION_THRESHOLD = 0.8;
-public static final double OBJ_CONFIDENCETHRESHOLD = 0.8;
-public static final double OBJ_REMOVAL_TIME = 0.5;
-
+  public static final double OBJ_CORELLATION_THRESHOLD = 0.8;
+  public static final double OBJ_CONFIDENCETHRESHOLD = 0.8;
+  public static final double OBJ_REMOVAL_TIME = 0.5;
 }

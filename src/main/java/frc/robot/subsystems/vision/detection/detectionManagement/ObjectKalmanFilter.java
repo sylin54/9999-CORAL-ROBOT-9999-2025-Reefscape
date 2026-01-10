@@ -12,115 +12,111 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 
 public class ObjectKalmanFilter {
 
-    //two different kalman filters for each axis
-    //inputs x/y measurement
-    //outputs: x/y
-    //states: x/y, x/y velocity
-    //knobs: x/y momentum, x/y inertia
+  // two different kalman filters for each axis
+  // inputs x/y measurement
+  // outputs: x/y
+  // states: x/y, x/y velocity
+  // knobs: x/y momentum, x/y inertia
 
-    //the momentum of the object, how much it sustains velocity
-    private double kV;
-    //the inertia of the object, how quickly it can change it's velocity
-    private double kA;
+  // the momentum of the object, how much it sustains velocity
+  private double kV;
+  // the inertia of the object, how quickly it can change it's velocity
+  private double kA;
 
-    //the standard deviation/covariance matrix of the state/predict step 
-    private Matrix stateStdDevs;
-    //the standard deviation/covariance matrix of the measurement step
-    private Matrix measurementStdDevs;
+  // the standard deviation/covariance matrix of the state/predict step
+  private Matrix stateStdDevs;
+  // the standard deviation/covariance matrix of the measurement step
+  private Matrix measurementStdDevs;
 
-    //the period/time it takes between repeats
-    private double dtSeconds;
+  // the period/time it takes between repeats
+  private double dtSeconds;
 
-    //the modeling of the x/y axis of movement
-    private LinearSystem<N2, N1, N2> xBallPlant;
-    private LinearSystem<N2, N1, N2> yBallPlant;
+  // the modeling of the x/y axis of movement
+  private LinearSystem<N2, N1, N2> xBallPlant;
+  private LinearSystem<N2, N1, N2> yBallPlant;
 
-    //filter for x/y
-    private KalmanFilter<N2, N1, N1> xObserver;
-    private KalmanFilter<N2, N1, N1> yObserver;
+  // filter for x/y
+  private KalmanFilter<N2, N1, N1> xObserver;
+  private KalmanFilter<N2, N1, N1> yObserver;
 
-    //measurement manager variables
-    private boolean hasNewMeasurement = false;
-    private Translation2d measurement = null;
+  // measurement manager variables
+  private boolean hasNewMeasurement = false;
+  private Translation2d measurement = null;
 
-    /**
-     * default instantiation SHOULD ONLY BE USED FOR TESTING
-     */
-    public ObjectKalmanFilter() {
-        this(0.8, 0.2, VecBuilder.fill(1.0, 2.0), VecBuilder.fill(1.0), 0.02);
+  /** default instantiation SHOULD ONLY BE USED FOR TESTING */
+  public ObjectKalmanFilter() {
+    this(0.8, 0.2, VecBuilder.fill(1.0, 2.0), VecBuilder.fill(1.0), 0.02);
+  }
+
+  /**
+   * @param kV momentum of the object
+   * @param kA inertia of the object
+   * @param stateStdDevs covariance of prediction
+   * @param measurementStdDevs covariance of measurement
+   * @param dtSeconds period of processing
+   */
+  public ObjectKalmanFilter(
+      double kV, double kA, Matrix stateStdDevs, Matrix measurementStdDevs, double dtSeconds) {
+    this.kV = kV;
+    this.kA = kA;
+
+    this.stateStdDevs = stateStdDevs;
+    this.measurementStdDevs = measurementStdDevs;
+
+    this.dtSeconds = dtSeconds;
+
+    xBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
+    yBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
+
+    xObserver =
+        new KalmanFilter(
+            Nat.N2(), Nat.N1(), xBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
+    yObserver =
+        new KalmanFilter(
+            Nat.N2(), Nat.N1(), yBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
+  }
+
+  /**
+   * adds a measurement to processed next periodic call
+   *
+   * @param measurement
+   */
+  public void addMeasurement(Translation2d measurement) {
+    this.measurement = measurement;
+    hasNewMeasurement = true;
+  }
+
+  /** process updates + predicts new values. MUST BE CALLED PERIODICALLY */
+  public void periodic() {
+    xObserver.predict(VecBuilder.fill(0), dtSeconds);
+    yObserver.predict(VecBuilder.fill(0), dtSeconds);
+
+    // procccess any new measurement. Vector fill 0 because this doesn't account for speed
+    if (hasNewMeasurement) {
+      xObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getX()));
+      yObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getY()));
+
+      hasNewMeasurement = false;
     }
+  }
 
-    /**
-     * 
-     * @param kV momentum of the object
-     * @param kA inertia of the object
-     * @param stateStdDevs covariance of prediction
-     * @param measurementStdDevs covariance of measurement
-     * @param dtSeconds period of processing
-     */
-    public ObjectKalmanFilter(double kV, double kA, Matrix stateStdDevs, Matrix measurementStdDevs, double dtSeconds) {
-        this.kV = kV;
-        this.kA = kA;
+  /**
+   * @return the estimated position of the object
+   */
+  public Translation2d getFilteredPosition() {
+    Translation2d output = new Translation2d(xObserver.getXhat(0), yObserver.getXhat(0));
 
-        this.stateStdDevs = stateStdDevs;
-        this.measurementStdDevs = measurementStdDevs;
+    return output;
+  }
 
-        this.dtSeconds = dtSeconds;
+  /**
+   * @return the estimated speed of the object
+   */
+  public Translation2d getFilteredSpeed() {
+    Translation2d output = new Translation2d(xObserver.getXhat(1), yObserver.getXhat(1));
 
-        xBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
-        yBallPlant = LinearSystemId.identifyPositionSystem(kV, kA);
-
-        xObserver = new KalmanFilter(Nat.N2(), Nat.N1(), xBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
-        yObserver = new KalmanFilter(Nat.N2(), Nat.N1(), yBallPlant, stateStdDevs, measurementStdDevs, dtSeconds);
-
-    }
-
-    /**
-     * adds a measurement to processed next periodic call
-     * @param measurement
-     */
-    public void addMeasurement(Translation2d measurement) {
-        this.measurement = measurement;
-        hasNewMeasurement = true;
-    }
-
-    /**
-     * process updates + predicts new values. MUST BE CALLED PERIODICALLY
-     */
-    public void periodic() {
-        xObserver.predict(VecBuilder.fill(0), dtSeconds);
-        yObserver.predict(VecBuilder.fill(0), dtSeconds);
-
-
-        //procccess any new measurement. Vector fill 0 because this doesn't account for speed
-        if(hasNewMeasurement) {
-            xObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getX()));
-            yObserver.correct(VecBuilder.fill(0), VecBuilder.fill(measurement.getY()));
-
-            hasNewMeasurement = false;
-        }
-    }
-
-    /**
-     * 
-     * @return the estimated position of the object
-     */
-    public Translation2d getFilteredPosition() {
-        Translation2d output = new Translation2d(xObserver.getXhat(0), yObserver.getXhat(0));
-
-        return output;
-    }
-
-    /**
-     * 
-     * @return the estimated speed of the object
-     */
-    public Translation2d getFilteredSpeed() {
-        Translation2d output = new Translation2d(xObserver.getXhat(1), yObserver.getXhat(1));
-
-        return output;
-    }
-
+    return output;
+  }
 }
 /*
  * points of improvement
@@ -128,8 +124,7 @@ public class ObjectKalmanFilter {
  * maybe add it to it's own thread if we notice the calls are inconsistent
  */
 
-
-//reference code. look at this if you wnat a sligthly simpler example.
+// reference code. look at this if you wnat a sligthly simpler example.
 
 /*
 
@@ -168,7 +163,7 @@ public class testLinearSystem {
     //learn abotu xhat
 
 
-    
+
     //first is angle, second is velocity
     //add fuzz because your unsure or because the system is super dynamic
 
@@ -179,7 +174,7 @@ public class testLinearSystem {
 
 
     //if we have issues maybve consider creating a threat ot do this seperately. Maybe??
-    //check if valid limeligth 
+    //check if valid limeligth
     public void periodic() {
         observer.predict(VecBuilder.fill(0), dtSeconds);
 
@@ -188,7 +183,7 @@ public class testLinearSystem {
             measurementFresh = false;
         }
     }
-    
+
     public void addMeasurement(double measurement) {
         this.measurement = measurement;
         measurementFresh = true;
