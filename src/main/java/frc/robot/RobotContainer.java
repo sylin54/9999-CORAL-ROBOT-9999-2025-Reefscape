@@ -152,106 +152,7 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    // arm.setDefaultCommand(
-    //     Commands.either(
-    //             arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE),
-    //             arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE),
-    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
-    //         .unless(() -> Robot.isArmManualControl()));
 
-    // intake.setDefaultCommand(
-    //     Commands.either(
-    //             intake.setTargetSpeedCommand(0),
-    //             intake.setTargetSpeedCommand(Constants.HOLDING_SPEED),
-    //             () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
-    //         .andThen(new TellCommand("Default command")));
-
-    // intake.setDefaultCommand(intake.setTargetSpeedCommand(0));
-
-    // if the canrange doesn't see anything set rollers to intake speed
-    // Command intakeCommand =
-    //     new InstantCommand(() -> Robot.setArmManualControl(false))
-    //         .andThen(
-    //             new ConditionalCommand(
-    //                     intake.setTargetSpeedCommand(Constants.INTAKE_SPEED),
-    //                     // if the canrange does see something(we have coral) set rollers to
-    // holding
-    //                     // speed and vibrate controller to let the driver no
-    //                     intake
-    //                         .setTargetSpeedCommand(Constants.HOLDING_SPEED)
-    //                         .alongWith(
-    //                             new WaitCommand(0.2)
-    //                                 .andThen(new ControllerVibrateCommand(0.2, controller))),
-    //                     // conditional for the earlier statement
-    //                     () -> canrange.getCanDistance() > Constants.CANRANGE_DETECTION_DISTANCE)
-    //                 .alongWith(
-    //                     // sets the arm angle to the intake angle
-    //                     arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)));
-
-    // Command intakeCommand =
-    //     // set the arm height to the floor
-    //     new InstantCommand(() -> Robot.setArmManualControl(true))
-    //         .andThen(
-    //             arm.setTargetHeightCommand(Constants.ARM_INTAKE_ANGLE)
-    //                 .alongWith(
-    //                     // intakes
-    //                     intake.setTargetSpeedCommand(Constants.INTAKE_SPEED)));
-    // whe[]\n it notices a coral inside it vibrates the controller
-    // .until(
-    //     () ->
-    //         canrange.getCanDistance()
-    //             < Constants.CANRANGE_DETECTION_DISTANCE)
-    // .andThen(intake.instantSetTargetSpeedCommand(Constants.HOLDING_SPEED))
-    // .andThen(
-    //     new ControllerVibrateCommand(Constants.CONTROLLER_FEEDBACK_AMOUNT, controller))))
-    ;
-
-    // Command scoringCommand =
-    //     new InstantCommand(() -> Robot.setArmManualControl(true))
-    //         .andThen(
-    //             arm.setTargetHeightCommandConsistentEnd(Constants.ARM_SCORING_ANGLE)
-    //                 .andThen(intake.setTargetSpeedCommand(Constants.EJECT_SPEED))
-    //                 .alongWith(
-    //                     new WaitCommand(Constants.CORAL_RELEASE_TIME)
-    //                         .andThen(new ControllerVibrateCommand(0.2, controller))));
-
-    // controller.leftTrigger().whileTrue(intakeCommand);
-
-    // controller.rightTrigger().whileTrue(scoringCommand);
-
-    // controller
-    //     .rightBumper()
-    //     .whileTrue(
-    //         new InstantCommand(() -> Robot.setArmManualControl(true))
-    //             .andThen(arm.setTargetHeightCommand(Constants.ARM_MIN_ANGLE)));
-
-    // controller.start().onTrue(arm.resetEncodersCommand().ignoringDisable(true));
-
-    // controller
-    //     .leftBumper()
-    //     .whileTrue(
-    //         new InstantCommand(() -> Robot.setArmManualControl(true))
-    //             .andThen(arm.setTargetHeightCommand(Constants.ARM_SCORING_ANGLE)));
-
-    Command pathfindToObjectCommand =
-        new PathfindToObjectCommand(
-            drive, () -> detector.getObjectPose(), false, () -> !detector.isDetected(), controller);
-
-    controller.leftTrigger().whileTrue(pathfindToObjectCommand);
-
-    controller.povLeft().whileTrue(intake.setTargetSpeedCommand(Constants.EJECT_SPEED));
-    controller.povRight().whileTrue(intake.setTargetSpeedCommand(Constants.INTAKE_SPEED));
-    // controller.povUp().whileTrue(intake.setTargetSpeedCommand(Constants.HOLDING_SPEED));
-
-    // manual controls
-    // controller
-    //     .povDown()
-    //     .onTrue(
-    //         new InstantCommand(() -> Robot.setArmManualControl(!Robot.isArmManualControl()))
-    //             .andThen(
-    //                 new ControllerVibrateCommand(0.4, controller)
-    //                     .withDeadline(new WaitCommand(0.7))
-    //                     .unless(() -> !Robot.isArmManualControl())));
 
     SmartDashboard.putData(
         "set canrange vision 0", (Sendable) this.canrange.setCanrangeDistanceCommand(0));
@@ -297,6 +198,14 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+
+    Command pathfindToObjectCommand =
+    new PathfindToObjectCommand(
+        drive, () -> detector.getObjectPose(), false, () -> !detector.isDetected(), controller);
+
+    controller.leftTrigger().whileTrue(pathfindToObjectCommand);
+
   }
 
   /**
